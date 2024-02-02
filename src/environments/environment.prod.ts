@@ -4,14 +4,14 @@ export const environment = {
   database: 'guest',
   adminKey: 'guest',
   firebase: {
-    apiKey: "",
-    authDomain: "",
-    databaseURL: "",
-    projectId: "",
-    storageBucket: "",
-    messagingSenderId: "",
-    appId: "",
-    measurementId: ""
+    apiKey: "AIzaSyAliRllgPPWF8F-yXLYvHprJvk3K2DaHf8",
+    authDomain: "countmein-e7dcb.firebaseapp.com",
+    databaseURL: "https://countmein-e7dcb-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "countmein-e7dcb",
+    storageBucket: "countmein-e7dcb.appspot.com", 
+    messagingSenderId: "29633496293",
+    appId: "1:29633496293:web:900446f30e4c84afd1000c",
+    measurementId: "G-B4JRKFNWYB"
   },
   social: {
     fblink: 'https://www.facebook.com/elishconsulting',
