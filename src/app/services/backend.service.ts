@@ -52,6 +52,8 @@ return this.afAuth.signInWithEmailAndPassword(formData.data.email, formData.data
     if (coll == "TICKETS") { _coll = "USER_TICKETS"; }
     if (coll == "WORKORDERS") { _coll = "USER_WORKORDERS"; }
     if (coll == "ORDERS") { _coll = "USER_ORDERS"; }
+    if (coll == "PRODUCTS") { _coll = "USER_PRODUCTS"; }
+    if (coll == "PRODUCTCATEGORY") { _coll = "USER_PRODUCTCATEGORY"; }
     return _coll;
   }
 
@@ -89,13 +91,14 @@ return this.afAuth.signInWithEmailAndPassword(formData.data.email, formData.data
     var docRef = this._afs.collection(this.getCollUrls(coll)).doc(docId);
     return docRef.delete().then((res) => { return true });
   }
+
   getDocs(coll: string, formData?) {
     if (formData) {
       if (formData.name) {
         return this._afs.collection(this.getCollUrls(coll), ref => ref.where('name', '>=', formData.name)).valueChanges();
       }
       if (formData.phone) {
-        return this._afs.collection(this.getCollUrls(coll), ref => ref.where('phone', '>=', formData.phone)).valueChanges();
+        return this._afs.collection(this.getCollUrls(coll), ref => ref.where('producttpe', '>=', formData.producttype)).valueChanges();
       }
     } else { // no search critera - fetch all docs
       return this._afs.collection(this.getCollUrls(coll)).valueChanges();

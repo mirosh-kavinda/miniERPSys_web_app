@@ -1,0 +1,216 @@
+<app-header pageTitle="Address Book" imageUrl="import_contacts" helpType="addressbook"></app-header>
+<mat-card [@fallIn]='state'>
+  <mat-card-content>
+    <div *ngIf="(toggleField=='searchMode') 
+    else (toggleField=='addMode')? showAddMode : ((toggleField=='editMode')? showEditMode : showResMode)">
+      <!-- searchmode -->
+
+      <form #searchFormData="ngForm" class="example-form">
+        <mat-card-actions align="start">
+          <button type="button" (click)="toggle('resMode');getData(searchFormData.value);" 
+          mat-raised-button [disabled]="(name.value == '') || !searchFormData.valid"
+            color="primary">Search</button>
+          <span class="med-spacer"></span>
+          <span matTooltip="add new contact">
+            <mat-icon color="primary" (click)="toggle('addMode')">add</mat-icon>
+          </span>
+
+          <span matTooltip="show Recent Results">
+            <mat-icon color="primary" (click)="toggle('resMode');getData();">cached</mat-icon>
+          </span>
+        </mat-card-actions>
+        <mat-form-field class="example-form">
+          <input matInput type="text" placeholder="Product Name" id="name" name="name" #name="ngModel" ngModel [disabled]="phone.value !== ''">
+        </mat-form-field>
+        <mat-error *ngIf="name.invalid && (name.dirty || name.touched)">Please enter a valid name.</mat-error>
+        <br>
+        <mat-form-field class="example-form">
+          <input matInput type="text" placeholder="Product Catogory #" id="phone" name="phone" #phone="ngModel" ngModel [disabled]="name.value !== ''" pattern="^[a-z0-9_-]{8,15}$">
+        </mat-form-field>
+        <mat-error *ngIf="phone.invalid && (phone.dirty || phone.touched)">Please enter a valid phone #.</mat-error>
+      </form>
+    </div>
+  </mat-card-content>
+</mat-card>
+<!-- addMode -->
+<ng-template #showAddMode>
+  <form [formGroup]="addDataForm" (ngSubmit)="setData(addDataForm.value);this.addDataForm.reset();" novalidate>
+    <mat-error *ngIf="savedChanges">
+      Data is saved.
+      <label class="small-spacer"></label>
+      <mat-icon (click)="this.addDataForm.reset();savedChanges=false;toggle('searchMode');">clear</mat-icon>
+    </mat-error>
+    <div *ngIf="!savedChanges">
+      <mat-progress-bar mode="indeterminate" *ngIf="dataLoading"></mat-progress-bar>
+      <mat-error *ngIf="error">Error: {{ errorMessage }}</mat-error>
+      <mat-card-actions align="start">
+        <button type="submit" mat-raised-button color="primary" [disabled]="!addDataForm.valid">New Product</button>
+        <button type="reset" (click)="this.addDataForm.reset();" mat-raised-button [disabled]="!addDataForm.valid" color="primary">Clear</button>
+        <span class="med-spacer"></span>
+        <span matTooltip="Search">
+          <mat-icon color="primary" (click)="toggle('searchMode')">search</mat-icon>
+        </span>
+        <span class="small-spacer"></span>
+        <span matTooltip="Show Recent Results">
+          <mat-icon color="primary" (click)="toggle('resMode');getData();">cached</mat-icon>
+        </span>
+      </mat-card-actions>
+      <!-- sadas -->
+      <mat-form-field>
+        <input matInput placeholder="Product Name" formControlName="name" required>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Product Type</mat-label>
+        <mat-select formControlName="producttype">
+          <mat-option *ngFor="let c of products" [value]="c">
+            {{ c }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field>
+        <input matInput placeholder="*Product Quantity" formControlName="quantity" required>
+      </mat-form-field>
+      <mat-form-field>
+        <input matInput placeholder="*Unit Price" formControlName="unitprice" required>
+      </mat-form-field>
+    </div>
+  </form>
+</ng-template>
+<!-- edit mode -->
+<ng-template #showEditMode>
+  <form [formGroup]="editDataForm" (ngSubmit)="updateData(editDataForm.value);" novalidate>
+    <input type="hidden" formControlName="_id" required>
+    <mat-error *ngIf="savedChanges">
+      Data is saved.
+      <label class="small-spacer"></label>
+      <mat-icon (click)="this.editDataForm.reset();savedChanges=false;toggle('searchMode');">clear</mat-icon>
+    </mat-error>
+    <div *ngIf="!savedChanges">
+      <mat-progress-bar mode="indeterminate" *ngIf="dataLoading"></mat-progress-bar>
+      <mat-error *ngIf="error">Error: {{ errorMessage }}</mat-error>
+      <mat-card-actions align="start">
+        <button type="submit" mat-raised-button 
+        [disabled]="!this.editDataForm.valid " color="primary">Update</button>
+        <span class="med-spacer"></span>
+        <span matTooltip="Search">
+          <mat-icon color="primary" (click)="toggle('searchMode')">search</mat-icon>
+        </span>
+        <span class="small-spacer"></span>
+        <span matTooltip="Shwo Recent Results">
+          <mat-icon color="primary" (click)="toggle('resMode');getData();">cached</mat-icon>
+        </span>
+      </mat-card-actions>
+      <mat-form-field>
+          <input matInput placeholder="Product Name" formControlName="name" required>
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Product Category #" formControlName="producttype" required>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Contact Type</mat-label>
+          <mat-select formControlName="product">
+            <mat-option *ngFor="let c of products" [value]="c">
+              {{ c }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-accordion>
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                Images
+              </mat-panel-title>
+              <mat-panel-description>
+                Images Links
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+                  <div *ngFor="let file of data$?.files">
+                      <br/>
+                      {{ file }}
+                      <button type="button" mat-raised-button (click)="showDocument=!showDocument; getDocUrl(file);" color="primary">Show Document</button>
+                  </div>
+              <div *ngIf="showDocument">
+                  <span matTooltip="Close">
+                      <mat-icon color="primary" (click)="showDocument = !showDocument;">clear
+                      </mat-icon>
+                  </span>
+                  <br/>
+                  <a href="{{ docUrl | async }}" target="_blank">Click here to open {{ fileName }} document</a>
+              </div>
+              <br>
+              <div *ngIf="showFileUpload">
+                  <span matTooltip="Close">
+                      <mat-icon color="primary" (click)="showFileUpload = !showFileUpload;">clear
+                      </mat-icon>
+                  </span>
+                  <br/>
+                  <app-fileupload fileUrl="PRODUCTS" docId="{{docId}}"></app-fileupload>
+              </div>
+              <br>
+              <button type="button" mat-raised-button
+               (click)="showFileUpload=!showFileUpload" color="primary">Upload File</button>
+          </mat-expansion-panel>
+        </mat-accordion>
+    </div>
+  </form>
+</ng-template>
+<!-- Results mode -->
+<ng-template #showResMode>
+  <mat-card-actions align="start">
+    <span class="med-spacer"></span>
+    <span class="med-spacer"></span>
+    <span class="med-spacer"></span>
+    <span matTooltip="Add new contact">
+      <mat-icon color="primary" (click)="toggle('addMode')">add</mat-icon>
+    </span>
+    <span class="small-spacer"></span>
+    <span matTooltip="Search All">
+      <mat-icon color="primary" (click)="toggle('searchMode')">search</mat-icon>
+    </span>
+  </mat-card-actions>
+  <div class="example-header">
+    <mat-form-field>
+      <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Search Recent Results">
+    </mat-form-field>
+  </div>
+  <div class="example-container mat-elevation-z8">
+    <mat-table [dataSource]="dataSource" matSort>
+      <ng-container matColumnDef="producttype">
+        <mat-header-cell *matHeaderCellDef mat-sort-header>Product Type</mat-header-cell>
+        <mat-cell *matCellDef="let row"> {{row.producttype}} </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef mat-sort-header>Name</mat-header-cell>
+        <mat-cell *matCellDef="let row"> {{row.name}} </mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="quantity">
+        <mat-header-cell *matHeaderCellDef mat-sort-header>Quantity</mat-header-cell>
+        <mat-cell *matCellDef="let row"> {{row.quantity}} </mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="unitprice">
+        <mat-header-cell *matHeaderCellDef mat-sort-header>Unit Price</mat-header-cell>
+        <mat-cell *matCellDef="let row"> {{row.unitprice}} </mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="_id">
+        <mat-header-cell *matHeaderCellDef> action </mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          <span matTooltip="Edit">
+            <button mat-icon-button (click)="getDoc(row._id)">
+              <mat-icon color="primary">edit</mat-icon>
+            </button>
+          </span>
+          <span matTooltip="Delete" >
+            <button mat-icon-button (click)="deleteDoc(row._id)">
+              <mat-icon color="primary">delete</mat-icon>
+            </button>
+          </span>
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    </mat-table>
+    <mat-paginator #paginator [length]="dataSource.filteredData.length" [pageIndex]="0" [pageSize]="5" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+  </div>
+</ng-template>

@@ -5,7 +5,7 @@
   font-size: 8;
   line-height: 40px;
   letter-spacing: -1px;
-  color: #0088cc;
+  color: black;
 }
 
 .middle-headline {
@@ -104,7 +104,7 @@ body {
   max-width: 400px;
 }
 .example-header-image {
-  background-image: url('http://localhost:4200/assets/images/sound.gif');
+  background-image: url('http://localhost:4200/assets/images/logo.png');
   background-size: cover;
 }
 .example-form {

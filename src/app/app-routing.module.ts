@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { AboutusComponent } from './shared/aboutus.component';
+import { AboutusComponent } from './ui/aboutus/aboutus.component';
 import { LoginComponent } from './ui/auth/login.component';
 import { SignupComponent } from './ui/auth/signup.component';
 import { AdminComponent } from './ui/auth/admin.component';
@@ -22,6 +22,10 @@ import { AngularFireAuthGuard, hasCustomClaim, redirectUnauthorizedTo, redirectL
 import { canActivate } from '@angular/fire/auth-guard';
 import { pipe } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { HomeComponent } from './ui/home/home.component';
+import { LandingComponent } from './ui/landing/landing.component';
+import { AddProductComponent } from './ui/addProduct/addproduct.component';
+import { AddCategoryComponent } from './ui/addCategory/addcategorycomponent';
 
 const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['login']);
 const redirectLoggedInToItems = () => redirectLoggedInTo(['aboutus']);
@@ -29,7 +33,11 @@ const redirectLoggedInToSettings = () => redirectLoggedInTo(['settings']);
 const hasRole = () => map(user => user ? ['settings'] : ['login']);
 
 const routes: Routes = [
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: '', redirectTo: '/landing', pathMatch: 'full' },
+  { path: 'landing', component: LandingComponent},
+  { path: 'addcategory', component: AddCategoryComponent,  ...canActivate(redirectUnauthorizedToLogin) },
+  { path: 'addproduct', component: AddProductComponent,  ...canActivate(redirectUnauthorizedToLogin) },
+  { path: 'home', component: HomeComponent,  ...canActivate(redirectUnauthorizedToLogin) },
   { path: 'aboutus', component: AboutusComponent,  ...canActivate(redirectUnauthorizedToLogin) },
   { path: 'addressbook', component: AddressComponent,  ...canActivate(redirectUnauthorizedToLogin) },
   { path: 'login', component: LoginComponent, ...canActivate(redirectLoggedInToSettings) },
@@ -44,7 +52,7 @@ const routes: Routes = [
   { path: 'workorder', component: WorkordersComponent, ...canActivate(redirectUnauthorizedToLogin) },
   { path: 'order', component: OrdersComponent, ...canActivate(redirectUnauthorizedToLogin) },
   { path: 'call', component: CallsComponent, ...canActivate(redirectUnauthorizedToLogin) },
-  { path: '**', redirectTo: '/login', pathMatch: 'full' }
+  { path: '**', redirectTo: '/landing', pathMatch: 'full' }
 ];
 
 @NgModule({

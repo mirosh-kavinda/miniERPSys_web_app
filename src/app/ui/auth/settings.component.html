@@ -63,11 +63,7 @@
         {{ errorMessage }}
       </mat-error>
     </mat-card-content>
-    <mat-card-actions align="start">
-      <button type="button" (click)="onSubmit_update(formData.value);" [disabled]="!formData.valid" mat-raised-button
-        color="primary">Update</button>
-      <button type="button" (click)="logout()" mat-raised-button color="primary">Logout</button>
-    </mat-card-actions>
+   
     <mat-form-field class="example-form">
       <input matInput placeholder="name" name="name" #name="ngModel" [ngModel]="data$?.name" required minlength="5"
         maxlength="30">
@@ -93,6 +89,11 @@
       <input matInput readonly placeholder="Role" name="role" #role="ngModel" [ngModel]="data$?.role">
       <!-- make this input role hidden -->
     </mat-form-field>
+    <mat-card-actions align="start">
+      <button type="button" (click)="onSubmit_update(formData.value);" [disabled]="!formData.valid" mat-raised-button
+        color="primary">Update</button>
+      <button type="button" (click)="logout()" mat-raised-button color="primary">Logout</button>
+    </mat-card-actions>
     <br /><br /><br /><br /><br />
   </form>
 </ng-template>

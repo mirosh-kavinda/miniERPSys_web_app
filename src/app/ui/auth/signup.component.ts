@@ -23,6 +23,7 @@ export class SignupComponent implements OnInit {
   IBData: DBInBoundData; // inbound data
   OBData: DBOutBoundData; // outbound data
 
+
   constructor(public auth: AngularFireAuth, private _router: Router, private _backendService: BackendService) { }
 
   ngOnInit() {
@@ -51,7 +52,12 @@ export class SignupComponent implements OnInit {
         this.IBData.error = true;
         this.IBData.statusCode =  0;
         this.IBData.statusMessage =  error;
-      }).then(r => this.dataLoading=false);
+      }).finally(() => {
+        this.dataLoading = false;
+      })
+      .then(() => {
+        this._router.navigateByUrl('/home');
+      });
   }
 
   routeLoginPage() {

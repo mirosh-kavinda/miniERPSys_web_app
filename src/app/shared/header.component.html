@@ -1,6 +1,6 @@
-<mat-toolbar color="none">
+<mat-toolbar color="black">
   <mat-toolbar-row>
-    <button mat-mini-fab color="warn" [matMenuTriggerFor]="rootMenu">
+    <button mat-mini-fab color="dark" [matMenuTriggerFor]="rootMenu">
       <mat-icon>menu</mat-icon>
     </button>
     <mat-menu #rootMenu="matMenu">
@@ -12,6 +12,16 @@
       <div mat-subheader *ngIf="(data$ | async)?.addressbook.visible">
         <button mat-menu-item routerLink="/addressbook">
           <mat-icon class="circle-link example-icon-link">import_contacts</mat-icon>Address Book
+        </button>
+      </div>
+      <div mat-subheader *ngIf="(data$ | async)?.product.visible">
+        <button mat-menu-item routerLink="/addproduct">
+          <mat-icon class="circle-link example-icon-link">import_product</mat-icon>Add Product
+        </button>
+      </div>
+      <div mat-subheader *ngIf="(data$ | async)?.product.visible">
+        <button mat-menu-item routerLink="/addcategory">
+          <mat-icon class="circle-link example-icon-link">Category</mat-icon>Add Category
         </button>
       </div>
       <div mat-subheader *ngIf="(data$ | async)?.addressbook.visible">
@@ -31,8 +41,8 @@
         </button>
       </div>
     </mat-menu>
-    <mat-icon class="example-icon">{{ imageUrl }}</mat-icon>
-    <span matTooltip="About us">{{ pageTitle }}</span><span class="example-spacer"></span>
+    <mat-icon class="example-icon"></mat-icon>
+    <span matTooltip="logo" routerLink="/home">CountmeIn</span><span class="example-spacer" ></span>
     <span matTooltip="Update Settings"><button mat-icon-button routerLink="/settings">
         <mat-icon>settings</mat-icon>
       </button></span>
@@ -41,9 +51,12 @@
         <mat-icon>help</mat-icon>
       </button>
     </span>
+    <span matTooltip="Logout" ><button mat-icon-button (click)="logout()">
+      <mat-icon>logout</mat-icon>
+    </button></span>
   </mat-toolbar-row>
 </mat-toolbar>
-<mat-menu #helpMenu="matMenu">
+<mat-menu #helpMenu="matMenu"  class="m-3" color="black">
   {{ helpType == "login" ? configData.login : ""}}
   {{ helpType == "register" ? configData.register : ""}}
   {{ helpType == "checkin" ? configData.checkin : ""}}
@@ -103,3 +116,4 @@
     </button>
   </div>
 </mat-menu>
+

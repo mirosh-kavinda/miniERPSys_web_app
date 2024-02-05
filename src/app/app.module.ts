@@ -6,7 +6,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-import { AboutusComponent } from './shared/aboutus.component';
+import { AboutusComponent } from './ui/aboutus/aboutus.component';
 import { FooterComponent } from './shared/footer.component';
 import { SimpleheaderComponent } from './shared/simpleheader.component';
 import { LoginComponent } from './ui/auth/login.component';
@@ -68,11 +68,20 @@ import { HeaderComponent } from './shared/header.component';
 import { FileUploadComponent } from './shared/dropzone/fileupload.component';
 import { DropZoneDirective } from './shared/dropzone/dropzone.directive';
 import { FileSizePipe } from './shared/dropzone/filesize.pipe';
+import { HomeComponent } from './ui/home/home.component';
+import { LandingComponent } from './ui/landing/landing.component';
+import { AddProductComponent } from './ui/addProduct/addproduct.component';
+import { AddCategoryComponent } from './ui/addCategory/addcategorycomponent';
+// import { MatCarouselModule } from '@';
 
 @NgModule({
   declarations: [
+    LandingComponent,
+    AddCategoryComponent,
+    AddProductComponent,
     AppComponent,
     AboutusComponent,
+    HomeComponent,
     FooterComponent,
     SimpleheaderComponent,
     LoginComponent,
@@ -94,12 +103,17 @@ import { FileSizePipe } from './shared/dropzone/filesize.pipe';
     CallsComponent
   ],
   imports: [
+    // MatCarouselModule,
+    MatDialogModule,
     BrowserModule,
     ReactiveFormsModule,
     FormsModule,
     AppRoutingModule,
     BrowserAnimationsModule,
     MatIconModule,
+    MatSidenavModule,
+    MatToolbarModule,
+    MatListModule,
     HttpClientModule,
     MatToolbarModule,
     MatButtonModule,

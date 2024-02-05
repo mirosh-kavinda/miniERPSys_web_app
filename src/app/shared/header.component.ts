@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { BackendService } from '../services/backend.service';
 import { AngularFireAuth } from '@angular/fire/auth';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-header',
@@ -15,13 +16,14 @@ export class HeaderComponent implements OnInit {
   authState: any = null;
   data$;
 
-  constructor(public afAuth: AngularFireAuth, private _backendService: BackendService) { }
+  constructor(public afAuth: AngularFireAuth, private _backendService: BackendService, private _router: Router) { }
 
   ngOnInit(): void {
     this.configData = this._backendService.getConfig("helptext");
     this.afAuth.authState.subscribe(authState => {
       this.authState = authState;
       this.getUserDoc();
+      
     })
   }
   getUserDoc() {
@@ -35,5 +37,14 @@ export class HeaderComponent implements OnInit {
       error => {},
       () => console.log("")
     );
+  }
+
+  logout() {
+    this.afAuth.signOut().then(res => {
+      this._router.navigate(['/landing']);
+    }).catch(e => {
+      console.log(e.message);
+      this._router.navigate(['/landing']);
+  });
   }
 }
