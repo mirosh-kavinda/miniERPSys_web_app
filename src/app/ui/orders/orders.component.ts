@@ -19,12 +19,13 @@ import { FormBuilder, FormGroup, FormArray, FormControl, Validators } from '@ang
 })
 export class OrdersComponent implements OnInit, OnDestroy {
   panelOpenState = false;
-  contacts = ['Personal', 'Customer', 'Manufacturer', 'Vendor', 'Other', 'Campaign', 'Lead', 'Oppurtunity'];
+  contacts = ['Personal', 'Customer', 'Manufacturer', 'Vendor', 'Other', 'Order', 'Lead', 'Oppurtunity'];
   addTypes = ['Home', 'Office', 'Primary', 'Mailing'];
   assignedTypes = ['Home', 'Office', 'Primary', 'Personal'];
   expenseTypes = ['Home', 'Office', 'Primary', 'Personal'];
   statuses = ['Open', 'In Progress', 'Hold', 'Closed'];
   members: any[];
+  users;
   dataSource: MatTableDataSource<any>;
   myDocData;
   data$;
@@ -36,6 +37,9 @@ export class OrdersComponent implements OnInit, OnDestroy {
   dataLoading: boolean = false;
   private querySubscription;
   authState: any = null;
+  products ;
+  productCat ;
+
 
   total_amount = 0;
   addDataForm: FormGroup;
@@ -63,34 +67,54 @@ export class OrdersComponent implements OnInit, OnDestroy {
     this.dataSource = new MatTableDataSource(this.members);
     this.addDataForm = this._fb.group({
       name: ['', [Validators.minLength(2), Validators.required]],
-      campaignID: ['', [Validators.minLength(10), Validators.pattern("^[0-9]*$")]],
-      campaignType: ['', [Validators.required]],
+      OrderType: ['', [Validators.required]],
       startDt: ['', [Validators.required]],
       endDt: ['', [Validators.required]],
       status: ['', [Validators.required]],
       purpose: ['',Validators.required],
       addresses: this._fb.array([]),
       assigned: this._fb.array([]),
-      expenses: this._fb.array([])
+      orderItems: this._fb.array([])
     });
     this.editDataForm = this._fb.group({
       _id: ['', Validators.required],
       name: ['', [Validators.minLength(2), Validators.required]],
-      campaignID: ['', [Validators.minLength(10), Validators.pattern("^[0-9]*$")]],
-      campaignType: ['', [Validators.required]],
+      OrderType: ['', [Validators.required]],
       startDt: ['', [Validators.required]],
       endDt: ['', [Validators.required]],
       status: ['', [Validators.required]],
       purpose: ['',Validators.required],
       addresses: this._fb.array([]),
       assigned: this._fb.array([]),
-      expenses: this._fb.array([])
+      orderItems: this._fb.array([])
     });
     this.afAuth.authState.subscribe(authState => {
       this.authState = authState;
     })
+    this.GetFormData();
   }
+  
+  
+  GetFormData(){
+    this._backendService.getDocs("PRODUCTCATEGORY").subscribe((res) => {
+      if (res.length > 0) {
+     this.productCat=res;
+      };
+    });
+      this._backendService.getDocs("USERS").subscribe((res) => {
+      if (res.length > 0) {
+      this.users=res;
+      console.log(this.users);
+     this.users = this.users.filter(user => user.role !== 'admin');
 
+      };
+    });
+    this._backendService.getDocs("PRODUCTS").subscribe((res) => {
+      if (res.length > 0) {
+     this.products=res;
+      };
+    });
+  }
   ADDRESSLINES(formName) {
     return this[formName].get('addresses') as FormArray;
   }
@@ -120,12 +144,14 @@ export class OrdersComponent implements OnInit, OnDestroy {
   }
 
   EXPENSESLINES(formName) {
-    return this[formName].get('expenses') as FormArray;
+    return this[formName].get('orderItems') as FormArray;
   }
   addExpenses(formName) {
     this.EXPENSESLINES(formName).push(this._fb.group({
-      expensestype: [''],
-      expenses: ['', [Validators.minLength(1)]]
+      prodCat: [''],
+      prodName: [''],
+      quantity:[''],
+      subtotal:0
     }));
   }
   deleteExpenses(index, formName) {
@@ -206,15 +232,15 @@ export class OrdersComponent implements OnInit, OnDestroy {
         this.editDataForm = this._fb.group({
           _id: ['', Validators.required],
           name: ['', [Validators.minLength(2), Validators.required]],
-          campaignID: ['', [Validators.minLength(10), Validators.pattern("^[0-9]*$")]],
-          campaignType: ['', [Validators.required]],
+          OrderID: ['', [Validators.minLength(10), Validators.pattern("^[0-9]*$")]],
+          OrderType: ['', [Validators.required]],
           startDt: ['', [Validators.required]],
           endDt: ['', [Validators.required]],
           status: ['', [Validators.required]],
           purpose: ['',Validators.required],
           addresses: this._fb.array([]),
           assigned: this._fb.array([]),
-          expenses: this._fb.array([])
+          orderItems: this._fb.array([])
         });
         this.editDataForm.patchValue(this.data$);
         for (let i = 0; i < this.data$["addresses"].length; i++) {
@@ -223,8 +249,8 @@ export class OrdersComponent implements OnInit, OnDestroy {
         for (let i = 0; i < this.data$["assigned"].length; i++) {
           this.ASSIGNEDLINES('editDataForm').push(this._fb.group(this.data$["assigned"][i]));
         }
-        for (let i = 0; i < this.data$["expenses"].length; i++) {
-          this.EXPENSESLINES('editDataForm').push(this._fb.group(this.data$["expenses"][i]));
+        for (let i = 0; i < this.data$["orderItems"].length; i++) {
+          this.EXPENSESLINES('editDataForm').push(this._fb.group(this.data$["orderItems"][i]));
         }
         this.toggle('editMode');
         this.dataLoading = false;
@@ -281,4 +307,23 @@ export class OrdersComponent implements OnInit, OnDestroy {
       this.querySubscription.unsubscribe();
     }
   }
+  filterProducts(categoryId: any) {
+      this.products = this.products.filter(product => product.producttype === categoryId);
+    } 
+
+    calculateSubtotal(index: number) {
+      const orderItemsArray = this.addDataForm.get('orderItems') as FormArray; // Explicitly cast to FormArray
+      const orderItem = orderItemsArray.at(index) as FormGroup; // Accessing form array controls by index
+      const quantity = orderItem.get('quantity').value;
+      const productName = orderItem.get('prodName').value;
+    
+      // Find the selected product based on the product name
+      const selectedProduct = this.products.find(product => product.name === productName);
+    
+  const unitPrice = selectedProduct ? parseFloat(selectedProduct.unitprice) : 0;
+
+  const subtotal = selectedProduct ? unitPrice * quantity : 0;
+      orderItem.get('subtotal').setValue(subtotal);
+    }
+    
 }

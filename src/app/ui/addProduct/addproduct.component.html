@@ -41,31 +41,29 @@
       <mat-icon (click)="this.addDataForm.reset();savedChanges=false;toggle('searchMode');">clear</mat-icon>
     </mat-error>
     <div *ngIf="!savedChanges">
+      <mat-card-actions>
+      <span matTooltip="Search">
+        <mat-icon color="primary" (click)="toggle('searchMode')">search</mat-icon>
+      </span>
+      <span class="small-spacer"></span>
+      <span matTooltip="Show Recent Results">
+        <mat-icon color="primary" (click)="toggle('resMode');getData();">cached</mat-icon>
+      </span>
+    </mat-card-actions>
       <mat-progress-bar mode="indeterminate" *ngIf="dataLoading"></mat-progress-bar>
       <mat-error *ngIf="error">Error: {{ errorMessage }}</mat-error>
-      <mat-card-actions align="start">
-        <button type="submit" mat-raised-button color="primary" [disabled]="!addDataForm.valid">New Product</button>
-        <button type="reset" (click)="this.addDataForm.reset();" mat-raised-button [disabled]="!addDataForm.valid" color="primary">Clear</button>
-        <span class="med-spacer"></span>
-        <span matTooltip="Search">
-          <mat-icon color="primary" (click)="toggle('searchMode')">search</mat-icon>
-        </span>
-        <span class="small-spacer"></span>
-        <span matTooltip="Show Recent Results">
-          <mat-icon color="primary" (click)="toggle('resMode');getData();">cached</mat-icon>
-        </span>
-      </mat-card-actions>
       <!-- sadas -->
+ 
       <mat-form-field>
-        <input matInput placeholder="Product Name" formControlName="name" required>
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>Product Type</mat-label>
+        <mat-label>Product Category</mat-label>
         <mat-select formControlName="producttype">
-          <mat-option *ngFor="let c of products" [value]="c">
-            {{ c }}
+          <mat-option *ngFor="let c of products" [value]="c.name">
+            {{ c.name }}
           </mat-option>
         </mat-select>
+      </mat-form-field>
+      <mat-form-field>
+        <input matInput placeholder="Product Name" formControlName="name" required>
       </mat-form-field>
       <mat-form-field>
         <input matInput placeholder="*Product Quantity" formControlName="quantity" required>
@@ -74,6 +72,11 @@
         <input matInput placeholder="*Unit Price" formControlName="unitprice" required>
       </mat-form-field>
     </div>
+    <mat-card-actions align="start">
+      <button type="submit" mat-raised-button color="primary" [disabled]="!addDataForm.valid">Add New Product</button>
+      <button type="reset" (click)="this.addDataForm.reset();" mat-raised-button [disabled]="!addDataForm.valid" color="primary">Clear</button>
+      <span class="med-spacer"></span>
+  </mat-card-actions>
   </form>
 </ng-template>
 <!-- edit mode -->

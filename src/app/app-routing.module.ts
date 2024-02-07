@@ -49,7 +49,7 @@ const routes: Routes = [
   { path: 'opportunity', component: OpportunityComponent, ...canActivate(redirectUnauthorizedToLogin) },
   { path: 'appointment', component: AppointmentsComponent, ...canActivate(redirectUnauthorizedToLogin) },
   { path: 'ticket', component: TicketsComponent, ...canActivate(redirectUnauthorizedToLogin) },
-  { path: 'workorder', component: WorkordersComponent, ...canActivate(redirectUnauthorizedToLogin) },
+  { path: 'job', component: WorkordersComponent, ...canActivate(redirectUnauthorizedToLogin) },
   { path: 'order', component: OrdersComponent, ...canActivate(redirectUnauthorizedToLogin) },
   { path: 'call', component: CallsComponent, ...canActivate(redirectUnauthorizedToLogin) },
   { path: '**', redirectTo: '/landing', pathMatch: 'full' }

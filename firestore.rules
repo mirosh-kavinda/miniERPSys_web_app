@@ -1,0 +1,104 @@
+rules_version = '2';
+service cloud.firestore {
+match /databases/{database}/documents {
+match /{document=**} {
+  allow read, write: if false;
+}
+
+match /USER_ROLES/{document} {
+allow read: if isSignedIn();
+}
+match /USER_SETTINGS/{document} {
+allow read: if (isSignedIn() && isDocOwner()) || isAdmin();
+allow create: if isSignedIn() && onlyContentChanged();
+allow update: if (isSignedIn() && isDocOwner() && onlyContentChanged()) || isAdmin();
+allow delete: if isAdmin();
+}
+match /USER_ADDRESSBOOK/{document=**} {
+allow read: if (isSignedIn() && isEmployee()) || isAdmin();
+allow create: if isSignedIn();
+allow update: if (isSignedIn() && isDocOwner()) || isAdmin();
+allow delete: if isAdmin();
+}
+match /USER_CAMPAIGN/{document=**} {
+allow read: if (isSignedIn() && isEmployee()) || isAdmin();
+allow create: if isSignedIn();
+allow update: if (isSignedIn() && isDocOwner()) || isAdmin();
+allow delete: if isAdmin();
+}
+match /USER_LEADS/{document=**} {
+allow read: if (isSignedIn() && isEmployee()) || isAdmin();
+allow create: if isSignedIn();
+allow update: if (isSignedIn() && isDocOwner()) || isAdmin();
+allow delete: if isAdmin();
+}
+match /USER_OPPURTUNITY/{document=**} {
+allow read: if (isSignedIn() && isEmployee()) || isAdmin();
+allow create: if isSignedIn();
+allow update: if (isSignedIn() && isDocOwner()) || isAdmin();
+allow delete: if isAdmin();
+}
+match /USER_APPOINTMENTS/{document=**} {
+allow read: if (isSignedIn() && isEmployee()) || isAdmin();
+allow create: if isSignedIn();
+allow update: if (isSignedIn() && isDocOwner()) || isAdmin();
+allow delete: if isAdmin();
+}
+match /USER_CALLS/{document=**} {
+allow read: if (isSignedIn() && isEmployee()) || isAdmin();
+allow create: if isSignedIn();
+allow update: if (isSignedIn() && isDocOwner()) || isAdmin();
+allow delete: if isAdmin();
+}
+match /USER_TICKETS/{document=**} {
+allow read: if (isSignedIn() && isEmployee()) || isAdmin();
+allow create: if isSignedIn();
+allow update: if (isSignedIn() && isDocOwner()) || isAdmin();
+allow delete: if isAdmin();
+}
+match /USER_WORKORDERS/{document=**} {
+allow read: if (isSignedIn() && isEmployee()) || isAdmin();
+allow create: if isSignedIn();
+allow update: if (isSignedIn() && isDocOwner()) || isAdmin();
+allow delete: if isAdmin();
+}
+match /USER_ORDERS/{document=**} {
+allow read: if (isSignedIn() && isEmployee()) || isAdmin();
+allow create: if isSignedIn();
+allow update: if (isSignedIn() && isDocOwner()) || isAdmin();
+allow delete: if isAdmin();
+}
+match /USER_PRODUCTS/{document=**} {
+allow read: if (isSignedIn() && isEmployee()) || isAdmin();
+allow create: if isSignedIn();
+allow update: if (isSignedIn() && isDocOwner()) || isAdmin();
+allow delete: if isAdmin();
+}
+match /USER_PRODUCTCATEGORY/{document=**} {
+allow read: if (isSignedIn() && isEmployee()) || isAdmin();
+allow create: if isSignedIn();
+allow update: if (isSignedIn() && isDocOwner()) || isAdmin();
+allow delete: if isAdmin();
+}
+// helper functions
+function isSignedIn() {
+return request.auth.uid != null;
+}
+function onlyContentChanged() {
+return request.resource.data.role == "" || request.resource.data.role == resource.data.role;
+// make sure user is not signing in with any role or changin his role during update
+}
+function isDocOwner() {
+return request.auth.uid == resource.data.author;
+}
+function isDocCreater() {
+return request.auth.uid == request.resource.data.author;
+}
+function isAdmin() {
+return get(/databases/$(database)/documents/USER_SETTINGS/$(request.auth.uid)).data.role == "admin";
+}
+function isEmployee() {
+return get(/databases/$(database)/documents/USER_SETTINGS/$(request.auth.uid)).data.role == "employee";
+}
+}
+}

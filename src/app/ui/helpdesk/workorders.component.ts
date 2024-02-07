@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { moveIn, fallIn } from '../../shared/router.animations';
 import { Observable } from 'rxjs';
-import { DataSource } from '@angular/cdk/collections';
+// import { DatePipe } from '@angular/common';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -19,10 +19,11 @@ import { FormBuilder, FormGroup, FormArray, FormControl, Validators } from '@ang
 })
 export class WorkordersComponent implements OnInit, OnDestroy {
   panelOpenState = false;
+  stealbars: string[] = ['8mm', '10mm', '12mm', '16mm', '20mm'];
   contacts = ['Personal', 'Customer', 'Manufacturer', 'Vendor', 'Other', 'Campaign', 'Lead', 'Oppurtunity'];
-  addTypes = ['Home', 'Office', 'Primary', 'Mailing'];
+  // addTypes = ['Home', 'Office', 'Primary', 'Mailing'];
   assignedTypes = ['Home', 'Office', 'Primary', 'Personal'];
-  expenseTypes = ['Home', 'Office', 'Primary', 'Personal'];
+  jobCat = ['SteelBarCounting', 'Transporting', 'Cleaning'];
   statuses = ['Open', 'In Progress', 'Hold', 'Closed'];
   members: any[];
   dataSource: MatTableDataSource<any>;
@@ -36,14 +37,15 @@ export class WorkordersComponent implements OnInit, OnDestroy {
   dataLoading: boolean = false;
   private querySubscription;
   authState: any = null;
-
+   timestamp ; // Example timestamp
+    // Adjust the format as needed
   total_amount = 0;
   addDataForm: FormGroup;
   editDataForm: FormGroup;
-
+  isStealBarSelect=false;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
-  displayedColumns = ['campaignType', 'name', 'campaignID', '_id'];
+  displayedColumns = ['jobCat', 'orderName', 'status','purpose','updatedAt', '_id'];
   // file upload
   docId: string;
   fileName: string;
@@ -51,60 +53,97 @@ export class WorkordersComponent implements OnInit, OnDestroy {
   showDocument: boolean = false;
   docUrl: Observable<string | null>;
   userRole$;
-
+  orders;
+  users;
   constructor(public afAuth: AngularFireAuth, private _backendService: BackendService, private _fb: FormBuilder) {
     this._backendService.userRole$.subscribe(res => this.userRole$ = res);
   }
 
+
+  GetFormData(){
+    this._backendService.getDocs("WORKORDERS").subscribe((res) => {
+      if (res.length > 0) {
+     this.orders=res;
+      };
+    });
+    this._backendService.getDocs("USERS").subscribe((res) => {
+      if (res.length > 0) {
+     this.users=res;
+      };
+    });
+  } 
+  // formattedDate(row: any): string {
+  //   return this.datePipe.transform(row.updatedAt, 'yyyy-MM-dd') || '-';
+  // }
+
+
+
+  selectJobCatRelatedData() {
+    this.isStealBarSelect=true
+
+ }
+  calculateSteelQuantity() {
+    // const product = '8mm';
+    const bundleWeight = parseFloat(this.addDataForm.get('weight').value);
+    let steelQuantity;
+
+    // switch (product) {
+    //   case '8mm':
+    //     steelQuantity = bundleWeight / 0.394;
+    //     break;
+    //   case '10mm':
+    //     steelQuantity = bundleWeight / 0.617;
+    //     break;
+    //   case '12mm':
+    //     steelQuantity = bundleWeight / 0.888;
+    //     break;
+    //   case '16mm':
+    //     steelQuantity = bundleWeight / 1.579;
+    //     break;
+    //   case '20mm':
+    //     steelQuantity = bundleWeight / 2.469;
+    //     break;
+    //   default:
+    //     steelQuantity = 0;
+    // }
+    steelQuantity = bundleWeight / 0.617;
+    this.addDataForm.patchValue({
+      quantity: Math.round(steelQuantity)
+    });
+    this.addDataForm.get('quantity').disable();
+  }
   ngOnInit() {
-    this.toggleField = "searchMode";
+    this.GetFormData();
+    this.toggleField = "addMode";
     this.error = false;
     this.errorMessage = "";
     this.dataSource = new MatTableDataSource(this.members);
     this.addDataForm = this._fb.group({
-      name: ['', [Validators.minLength(2), Validators.required]],
-      campaignID: ['', [Validators.minLength(10), Validators.pattern("^[0-9]*$")]],
-      campaignType: ['', [Validators.required]],
-      startDt: ['', [Validators.required]],
-      endDt: ['', [Validators.required]],
+      orderName: ['', [Validators.minLength(2), Validators.required]],
+      jobCat: ['', [Validators.required]],
+      weight: ['', [Validators.required]],
+      quantity: ['', [Validators.required]],
       status: ['', [Validators.required]],
       purpose: ['',Validators.required],
-      addresses: this._fb.array([]),
-      assigned: this._fb.array([]),
-      expenses: this._fb.array([])
+      assigned: this._fb.array([])
+      
     });
     this.editDataForm = this._fb.group({
       _id: ['', Validators.required],
-      name: ['', [Validators.minLength(2), Validators.required]],
-      campaignID: ['', [Validators.minLength(10), Validators.pattern("^[0-9]*$")]],
-      campaignType: ['', [Validators.required]],
-      startDt: ['', [Validators.required]],
-      endDt: ['', [Validators.required]],
+      orderName: ['', [Validators.minLength(2), Validators.required]],
+      jobCat: ['', [Validators.required]],
+      weight: ['', [Validators.required]],
+      quantity: ['', [Validators.required]],
       status: ['', [Validators.required]],
       purpose: ['',Validators.required],
-      addresses: this._fb.array([]),
-      assigned: this._fb.array([]),
-      expenses: this._fb.array([])
+      assigned: this._fb.array([])
     });
     this.afAuth.authState.subscribe(authState => {
       this.authState = authState;
     })
   }
 
-  ADDRESSLINES(formName) {
-    return this[formName].get('addresses') as FormArray;
-  }
-
-  addAddress(formName) {
-    this.ADDRESSLINES(formName).push(this._fb.group({
-      addtype: [''],
-      address: ['']
-    }));
-  }
-  deleteAddress(index, formName) {
-    this.ADDRESSLINES(formName).removeAt(index);
-  }
-
+  
   ASSIGNEDLINES(formName) {
     return this[formName].get('assigned') as FormArray;
   }
@@ -119,18 +158,6 @@ export class WorkordersComponent implements OnInit, OnDestroy {
     this.ASSIGNEDLINES(formName).removeAt(index);
   }
 
-  EXPENSESLINES(formName) {
-    return this[formName].get('expenses') as FormArray;
-  }
-  addExpenses(formName) {
-    this.EXPENSESLINES(formName).push(this._fb.group({
-      expensestype: [''],
-      expenses: ['', [Validators.minLength(1)]]
-    }));
-  }
-  deleteExpenses(index, formName) {
-    this.EXPENSESLINES(formName).removeAt(index);
-  }
 
   toggle(filter?) {
     if (!filter) { filter = "searchMode" }
@@ -204,28 +231,20 @@ export class WorkordersComponent implements OnInit, OnDestroy {
       if (res) {
         this.data$ = res;
         this.editDataForm = this._fb.group({
-          _id: ['', Validators.required],
-          name: ['', [Validators.minLength(2), Validators.required]],
-          campaignID: ['', [Validators.minLength(10), Validators.pattern("^[0-9]*$")]],
-          campaignType: ['', [Validators.required]],
-          startDt: ['', [Validators.required]],
-          endDt: ['', [Validators.required]],
+          orderName: ['', [Validators.minLength(2), Validators.required]],
+          jobCat: ['', [Validators.required]],
+          weight: ['', [Validators.required]],
+          quantity: ['', [Validators.required]],
           status: ['', [Validators.required]],
           purpose: ['',Validators.required],
-          addresses: this._fb.array([]),
-          assigned: this._fb.array([]),
-          expenses: this._fb.array([])
+          assigned: this._fb.array([])
+          
         });
-        this.editDataForm.patchValue(this.data$);
-        for (let i = 0; i < this.data$["addresses"].length; i++) {
-          this.ADDRESSLINES('editDataForm').push(this._fb.group(this.data$["addresses"][i]));
-        }
+       
         for (let i = 0; i < this.data$["assigned"].length; i++) {
           this.ASSIGNEDLINES('editDataForm').push(this._fb.group(this.data$["assigned"][i]));
         }
-        for (let i = 0; i < this.data$["expenses"].length; i++) {
-          this.EXPENSESLINES('editDataForm').push(this._fb.group(this.data$["expenses"][i]));
-        }
+        
         this.toggle('editMode');
         this.dataLoading = false;
       }

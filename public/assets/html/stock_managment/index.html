@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock Management </title>
+  <!-- Bootstrap CSS -->
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../Assets/css/bootstrap.min.css">
+  <link type="text/css" rel="stylesheet" href="../Assets/css/style.css">
+  <!-- Custom styles for this template-->
+  <link href="../css/sb-admin-2.min.css" rel="stylesheet">
+  <link href="../vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+  <link
+    href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+    rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-database.js"></script>
+  <script src="../Assets/js/firebase.js"></script>
+  <script src="../Assets/js/functions.js"></script>
+  <script>
+    fetchProductDetails();
+    fetchCategoryDetails();
+    
+  </script>
+</head>
+
+<body id="page-top">
+  <div id="wrapper">
+    <ul class="navbar-nav bg-gradient-secondary sidebar sidebar-dark accordion" id="accordionSidebar">
+      <!-- Sidebar - Brand -->
+      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="../index.html">
+        <div class="sidebar-brand-icon rotate-n-15">
+          <i class="fas fa-calculator "></i>
+        </div>
+        <div class="sidebar-brand-text mx-3">CountMeIn</sup></div>
+      </a>
+    <br>
+    <br>
+      <li class="nav-item active">
+        <a class="nav-link" href="../analysys.html">
+          <i class="fas fa-fw fa-tachometer-alt"></i>
+          <span>Analysys</span></a>
+    
+      </li>
+      <hr class="sidebar-dividerfetchCategoryNames">
+
+      <li class="nav-item active">
+        <a class="nav-link" href="../order_management/index.html">
+          <i class="fab fa-product-hunt"></i>
+          <span>Order Management</span></a>
+      </li>
+      <li class="nav-item active">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseOrder" aria-expanded="true"
+          aria-controls="collapseOrder">
+          <span>Stock Management</span>
+        </a>
+        <div id="collapseOrder" class="collapse show" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+          <div class="bg-white py-2 collapse-inner rounded">
+            <a class="collapse-item" href="./index.html"onclick="loadOrdersForm('Existing Orders')">Product Overview</a>
+            <a class="collapse-item" href="./add.html" onclick="loadOrdersForm('Add Order')">Add Order</a>
+          </div>
+        </div>
+      </li>
+      <!-- Divider -->
+    
+      <!-- Nav Item - Pages Collapse Menu -->
+      <hr class="sidebar-divider">
+  <!-- Nav Item - Pages Collapse Menu -->
+      <li class="nav-item active">
+        <a class="nav-link" href="../job_management/index.html">
+          <i class="fab fa-product-hunt"></i>
+          <span>Job Management</span></a>
+      </li>
+      <!-- Divider -->
+      <hr class="sidebar-divider">
+
+
+      <li class="nav-item active">
+        <a class="nav-link" href="../dispatch_Management/index.html">
+          <i class="fab fa-product-hunt"></i>
+          <span>Dispatch Management</span></a>
+      </li>
+      <!-- Divider -->
+      <hr class="sidebar-divider">
+
+      <!-- Sidebar Toggler (Sidebar) -->
+      <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+      </div>
+   
+    </ul>
+
+    <div class="container">
+        <div class="p-1 mt-2 col" id="orderStatus">
+          <h2>Product Overview</h2>
+          <!-- Page Content -->
+            <div class="row">
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Total Products</h5>
+                    <p class="card-text">2</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Low Stock Products</h5>
+                    <p class="card-text">0</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Out of Stock Products</h5>
+                    <p class="card-text">0</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+        </div>
+        <div class="p-5 mt-4 col">
+            <div class="card shadow p-4 col">
+            <!-- Stock Table -->
+                <div id="productableContainer" style="display: none;">
+                  <br><br>
+                  <h4>Added Products In Order</h4>
+                  <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                      <thead>
+                          <tr>
+                              <th>Product ID</th>
+                              <th>Product Name</th>
+                              <th>Product Category</th>
+                              <th>Quantity</th>
+                              <th>Unit Price</th>
+                          
+                          </tr>
+                      </thead>
+                      <tbody id="producttableBody">
+
+                      </tbody>
+                  </table>
+              </div>
+        </div>
+          
+        
+          <div class="card shadow p-4 col">
+          <div id="categoryTableContainer" style="display: none;">
+            <br><br>
+            <h4>Added Categories</h4>
+            <table class="table table-bordered" id="categoryDataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Category ID</th>
+                        <th>Category Name</th>
+                        <th>Category Area</th>
+            
+                    </tr>
+                </thead>
+                <tbody id="CategorytableBody">
+        
+                </tbody>
+            </table>
+        </div>
+        </div>
+        </div>
+        </div>
+</div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+ 
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <!-- Custom scripts for all pages-->
+  <!-- <script src="../js/sb-admin-2.min.js"></script> -->
+  <script src="../vendor/jquery-easing/jquery.easing.min.js"></script>
+</body>
+
+</html>
+
+
+    

@@ -1,4 +1,4 @@
-<app-header pageTitle="Work Order" imageUrl="sms" helpType="crm"></app-header>
+<app-header pageTitle="" imageUrl="sms" helpType="crm"></app-header>
 <mat-card [@fallIn]='state'>
     <mat-card-content>
         <div *ngIf="(toggleField=='searchMode') 
@@ -7,7 +7,7 @@
             <form #searchFormData="ngForm" class="example-form">
                 <mat-card-actions align="start">
                     <button type="button" (click)="toggle('resMode');getData(searchFormData.value);" mat-raised-button
-                        [disabled]="(name.value == '' && campaignID.value == '') || !searchFormData.valid"
+                        [disabled]="!searchFormData.valid"
                         color="primary">Search</button>
                     <span class="med-spacer"></span>
                     <span matTooltip="add new contact">
@@ -18,18 +18,22 @@
                         <mat-icon color="primary" (click)="toggle('resMode');getData();">cached</mat-icon>
                     </span>
                 </mat-card-actions>
-                <mat-form-field class="example-form">
-                    <input matInput type="text" placeholder="Work Order Name" id="name" name="name" #name="ngModel" ngModel
-                        [disabled]="campaignID.value !== ''">
+                <mat-form-field>
+                    <mat-label>Job Type</mat-label>
+                    <mat-select formControlName="jobCat">
+                        <mat-option *ngFor="let c of orders" [value]="c">
+                            {{ c.campaignType }}
+                        </mat-option>
+                    </mat-select>
                 </mat-form-field>
-                <mat-error *ngIf="name.invalid && (name.dirty || name.touched)">Please enter a valid Work Order.</mat-error>
-                <br>
-                <mat-form-field class="example-form">
-                    <input matInput type="text" placeholder="Work Order #" id="campaignID" name="campaignID"
-                        #campaignID="ngModel" ngModel [disabled]="name.value !== ''" pattern="^[a-z0-9_-]{8,15}$">
+                <mat-form-field>
+                    <mat-label>Job Description</mat-label>
+                    <mat-select formControlName="orderName">
+                        <mat-option *ngFor="let c of orders" [value]="c">
+                            {{ c.name }}
+                        </mat-option>
+                    </mat-select>
                 </mat-form-field>
-                <mat-error *ngIf="campaignID.invalid && (campaignID.dirty || campaignID.touched)">Please enter a valid
-                    Work Order #.</mat-error>
             </form>
         </div>
     </mat-card-content>
@@ -59,74 +63,62 @@
                     <mat-icon color="primary" (click)="toggle('resMode');getData();">cached</mat-icon>
                 </span>
             </mat-card-actions>
+           
             <mat-form-field>
-                <input matInput placeholder="Name" formControlName="name" required>
-            </mat-form-field>
-            <mat-form-field>
-                <input matInput placeholder="Work Order ID #" formControlName="campaignID" required>
-            </mat-form-field>
-            <mat-form-field>
-                <mat-label>Contact Type</mat-label>
-                <mat-select formControlName="campaignType">
-                    <mat-option *ngFor="let c of contacts" [value]="c">
-                        {{ c }}
+                <mat-label>Select Order</mat-label>
+                <mat-select formControlName="orderName">
+                    <mat-option *ngFor="let c of orders" [value]="c.name">
+                        {{ c.name }}
                     </mat-option>
                 </mat-select>
+                
+            </mat-form-field>
+            <div (blur)="selectJobCatRelatedData()">
+                <mat-form-field>
+                    <mat-label>Job Category</mat-label>
+                    <mat-select formControlName="jobCat"  >
+                        <mat-option *ngFor="let c of jobCat" [value]="c">
+                            {{ c }}
+                        </mat-option>
+                    </mat-select>
+                    
+                </mat-form-field>
+            </div>
+            <mat-form-field *ngIf="isStealBarSelect">
+                <mat-label>Steel Bar Variant</mat-label>
+                <mat-select formControlName="variant">
+                    <mat-option *ngFor="let c of stealbars" [value]="c">
+                        {{ c}}
+                    </mat-option>
+                </mat-select>
+                
             </mat-form-field>
             <br />
             <mat-form-field>
-                <input matInput type="date" placeholder="Start Date" formControlName="startDt" required>
-            </mat-form-field>
-            <mat-form-field>
-                <input matInput type="date" placeholder="End Date" formControlName="endDt" required>
-            </mat-form-field>
-            <mat-form-field>
-                <mat-label>Status</mat-label>
+                <mat-label>Job Status</mat-label>
                 <mat-select formControlName="status">
                     <mat-option *ngFor="let c of statuses" [value]="c">
-                        {{ c }}
+                        {{ c}}
                     </mat-option>
                 </mat-select>
+                
+            </mat-form-field>
+            <mat-form-field>
+                <input matInput placeholder="Enter Weight Of Bundle (Kg)" formControlName="weight" id="bundleWeight" (blur)="calculateSteelQuantity()"   required>
             </mat-form-field>
             <br />
+            <mat-form-field>
+                <input matInput placeholder="quantity" disabled formControlName="quantity"  required>
+            </mat-form-field>
             <mat-form-field class="example-full-width">
                 <mat-label>Leave a comment</mat-label>
                 <textarea matInput placeholder="Ex. Purpose of Work Order..." formControlName="purpose"></textarea>
             </mat-form-field>
             <mat-accordion>
-                <mat-expansion-panel>
-                    <mat-expansion-panel-header>
-                        <mat-panel-title>
-                            Addresses
-                        </mat-panel-title>
-                        <mat-panel-description>
-                        </mat-panel-description>
-                    </mat-expansion-panel-header>
-                    <div formArrayName="addresses">
-                        <div *ngFor="let item of addDataForm.get('addresses')?.controls; let pointIndex=index"
-                            [formGroupName]="pointIndex">
-                            <mat-form-field>
-                                <mat-label>Address Type</mat-label>
-                                <mat-select formControlName="addtype">
-                                    <mat-option *ngFor="let a of addTypes" [value]="a">
-                                        {{ a }}
-                                    </mat-option>
-                                </mat-select>
-                            </mat-form-field>
-                            <mat-form-field>
-                                <input matInput placeholder="Full Address" formControlName="address">
-                            </mat-form-field>
-                            <mat-icon color="warn" *ngIf="(userRole$ | async)?.addressbook.delete"
-                                (click)="deleteAddress(pointIndex,'addDataForm')">delete</mat-icon>
-                        </div>
-                        <mat-icon color="primary" *ngIf="(userRole$ | async)?.addressbook.delete"
-                            (click)="addAddress('addDataForm')">add</mat-icon>
-                    </div>
-                </mat-expansion-panel>
                 <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = false">
                     <mat-expansion-panel-header>
                         <mat-panel-title>
-                            Assignments
+                            Assign User 
                         </mat-panel-title>
                         <mat-panel-description>
                         </mat-panel-description>
@@ -137,14 +129,11 @@
                             [formGroupName]="pointIndex">
                             <mat-form-field>
                                 <mat-label>Assigned To</mat-label>
-                                <mat-select formControlName="assignedtype">
-                                    <mat-option *ngFor="let a of assignedTypes" [value]="a">
-                                        {{ a }}
+                                <mat-select formControlName="assigned" required>
+                                    <mat-option *ngFor="let a of users" [value]="a.name">
+                                        {{ a.name }}
                                     </mat-option>
                                 </mat-select>
-                            </mat-form-field>
-                            <mat-form-field>
-                                <input matInput placeholder="Assigned to" formControlName="assigned">
                             </mat-form-field>
                             <mat-icon color="warn" *ngIf="(userRole$ | async)?.addressbook.delete"
                                 (click)="deleteAssigned(pointIndex,'addDataForm')">delete</mat-icon>
@@ -153,35 +142,6 @@
                             (click)="addAssigned('addDataForm')">add</mat-icon>
                     </div>
 
-                </mat-expansion-panel>
-                <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = false">
-                    <mat-expansion-panel-header>
-                        <mat-panel-title>
-                            Expenses
-                        </mat-panel-title>
-                        <mat-panel-description>
-                        </mat-panel-description>
-                    </mat-expansion-panel-header>
-                    <div formArrayName="expenses">
-                        <div *ngFor="let item of addDataForm.get('expenses')?.controls; let pointIndex=index"
-                            [formGroupName]="pointIndex">
-                            <mat-form-field>
-                                <mat-label>Expense Type</mat-label>
-                                <mat-select formControlName="expensestype">
-                                    <mat-option *ngFor="let a of expenseTypes" [value]="a">
-                                        {{ a }}
-                                    </mat-option>
-                                </mat-select>
-                            </mat-form-field>
-                            <mat-form-field>
-                                <input matInput placeholder="Expenses" formControlName="expenses">
-                            </mat-form-field>
-                            <mat-icon color="warn" *ngIf="(userRole$ | async)?.addressbook.delete"
-                                (click)="deleteExpenses(pointIndex,'addDataForm')">delete</mat-icon>
-                        </div>
-                        <mat-icon color="primary" *ngIf="(userRole$ | async)?.addressbook.delete"
-                            (click)="addExpenses('addDataForm')">add</mat-icon>
-                    </div>
                 </mat-expansion-panel>
             </mat-accordion>
         </div>
@@ -212,165 +172,72 @@
                 </span>
             </mat-card-actions>
             <mat-form-field>
-                <input matInput placeholder="Name" formControlName="name" required>
+                <mat-label>Select Order</mat-label>
+                <mat-select formControlName="orderName">
+                    <mat-option *ngFor="let c of orders" [value]="c.name">
+                        {{ c.name }}
+                    </mat-option>
+                </mat-select>
+                
             </mat-form-field>
             <mat-form-field>
-                <input matInput placeholder="Work Order ID #" formControlName="campaignID" required>
-            </mat-form-field>
-            <mat-form-field>
-                <mat-label>Contact Type</mat-label>
-                <mat-select formControlName="campaignType">
-                    <mat-option *ngFor="let c of contacts" [value]="c">
+                <mat-label>Job Category</mat-label>
+                <mat-select formControlName="jobCat">
+                    <mat-option *ngFor="let c of jobCat" [value]="c">
                         {{ c }}
                     </mat-option>
                 </mat-select>
+                
             </mat-form-field>
             <br />
             <mat-form-field>
-                <mat-label>Start Date</mat-label>
-                <input matInput type="date" formControlName="startDt" required>
-            </mat-form-field>
-            <mat-form-field>
-                <input matInput type="date" placeholder="End Date" formControlName="endDt" required>
-            </mat-form-field>
-            <mat-form-field>
-                <mat-label>Status</mat-label>
+                <mat-label>Job Status</mat-label>
                 <mat-select formControlName="status">
                     <mat-option *ngFor="let c of statuses" [value]="c">
-                        {{ c }}
+                        {{ c}}
                     </mat-option>
                 </mat-select>
+                
+            </mat-form-field>
+            <mat-form-field>
+                <input matInput placeholder="Enter Weight Of Bundle (Kg)" formControlName="weight" id="bundleWeight" (blur)="calculateSteelQuantity()"   required>
             </mat-form-field>
             <br />
+            <mat-form-field>
+                <input matInput placeholder="quantity" disabled formControlName="quantity"  required>
+            </mat-form-field>
             <mat-form-field class="example-full-width">
                 <mat-label>Leave a comment</mat-label>
                 <textarea matInput placeholder="Ex. Purpose of Work Order..." formControlName="purpose"></textarea>
             </mat-form-field>
             <mat-accordion>
-                <mat-expansion-panel>
-                    <mat-expansion-panel-header>
-                        <mat-panel-title>
-                            Addresses
-                        </mat-panel-title>
-                        <mat-panel-description>
-                        </mat-panel-description>
-                    </mat-expansion-panel-header>
-                    <div formArrayName="addresses">
-                        <div *ngFor="let item of editDataForm.get('addresses')?.controls; let pointIndex=index"
-                            [formGroupName]="pointIndex">
-                            <mat-form-field>
-                                <mat-label>Address Type</mat-label>
-                                <mat-select formControlName="addtype">
-                                    <mat-option *ngFor="let a of addTypes" [value]="a">
-                                        {{ a }}
-                                    </mat-option>
-                                </mat-select>
-                            </mat-form-field>
-                            <mat-form-field>
-                                <input matInput placeholder="Full Address" formControlName="address">
-                            </mat-form-field>
-                            <mat-icon color="warn" *ngIf="(userRole$ | async)?.addressbook.delete"
-                                (click)="deleteAddress(pointIndex,'editDataForm')">delete</mat-icon>
-                        </div>
-                        <mat-icon color="primary" *ngIf="(userRole$ | async)?.addressbook.delete"
-                            (click)="addAddress('editDataForm')">add</mat-icon>
-                    </div>
-                </mat-expansion-panel>
                 <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = false">
                     <mat-expansion-panel-header>
                         <mat-panel-title>
-                            Assignments
+                            Assign User 
                         </mat-panel-title>
                         <mat-panel-description>
                         </mat-panel-description>
                     </mat-expansion-panel-header>
 
                     <div formArrayName="assigned">
-                        <div *ngFor="let item of editDataForm.get('assigned')?.controls; let pointIndex=index"
+                        <div *ngFor="let item of addDataForm.get('assigned')?.controls; let pointIndex=index"
                             [formGroupName]="pointIndex">
                             <mat-form-field>
                                 <mat-label>Assigned To</mat-label>
-                                <mat-select formControlName="assignedtype">
-                                    <mat-option *ngFor="let a of assignedTypes" [value]="a">
-                                        {{ a }}
+                                <mat-select formControlName="assigned" required>
+                                    <mat-option *ngFor="let a of users" [value]="a.name">
+                                        {{ a.name }}
                                     </mat-option>
                                 </mat-select>
                             </mat-form-field>
-                            <mat-form-field>
-                                <input matInput placeholder="Assigned to" formControlName="assigned">
-                            </mat-form-field>
                             <mat-icon color="warn" *ngIf="(userRole$ | async)?.addressbook.delete"
-                                (click)="deleteAssigned(pointIndex,'editDataForm')">delete</mat-icon>
+                                (click)="deleteAssigned(pointIndex,'addDataForm')">delete</mat-icon>
                         </div>
                         <mat-icon color="primary" *ngIf="(userRole$ | async)?.addressbook.delete"
-                            (click)="addAssigned('editDataForm')">add</mat-icon>
+                            (click)="addAssigned('addDataForm')">add</mat-icon>
                     </div>
 
-                </mat-expansion-panel>
-                <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = false">
-                    <mat-expansion-panel-header>
-                        <mat-panel-title>
-                            Expenses
-                        </mat-panel-title>
-                        <mat-panel-description>
-                        </mat-panel-description>
-                    </mat-expansion-panel-header>
-                    <div formArrayName="expenses">
-                        <div *ngFor="let item of editDataForm.get('expenses')?.controls; let pointIndex=index"
-                            [formGroupName]="pointIndex">
-                            <mat-form-field>
-                                <mat-label>Expense Type</mat-label>
-                                <mat-select formControlName="expensestype">
-                                    <mat-option *ngFor="let a of expenseTypes" [value]="a">
-                                        {{ a }}
-                                    </mat-option>
-                                </mat-select>
-                            </mat-form-field>
-                            <mat-form-field>
-                                <input matInput placeholder="Expenses" formControlName="expenses">
-                            </mat-form-field>
-                            <mat-icon color="warn" *ngIf="(userRole$ | async)?.addressbook.delete"
-                                (click)="deleteExpenses(pointIndex,'editDataForm')">delete</mat-icon>
-                        </div>
-                        <mat-icon color="primary" *ngIf="(userRole$ | async)?.addressbook.delete"
-                            (click)="addExpenses('editDataForm')">add</mat-icon>
-                    </div>
-                </mat-expansion-panel>
-                <mat-expansion-panel>
-                    <mat-expansion-panel-header>
-                        <mat-panel-title>
-                            Documents
-                        </mat-panel-title>
-                        <mat-panel-description>
-                            Documents Links
-                        </mat-panel-description>
-                    </mat-expansion-panel-header>
-                    <div *ngFor="let file of data$?.files">
-                        <br />
-                        {{ file }}
-                        <button type="button" mat-raised-button (click)="showDocument=!showDocument; getDocUrl(file);"
-                            color="primary">Show Document</button>
-                    </div>
-                    <div *ngIf="showDocument">
-                        <span matTooltip="Close">
-                            <mat-icon color="primary" (click)="showDocument = !showDocument;">clear
-                            </mat-icon>
-                        </span>
-                        <br />
-                        <a href="{{ docUrl | async }}" target="_blank">Click here to open {{ fileName }} document</a>
-                    </div>
-                    <br>
-                    <div *ngIf="showFileUpload">
-                        <span matTooltip="Close">
-                            <mat-icon color="primary" (click)="showFileUpload = !showFileUpload;">clear
-                            </mat-icon>
-                        </span>
-                        <br />
-                        <app-fileupload fileUrl="WORKORDER" docId="{{docId}}"></app-fileupload>
-                    </div>
-                    <br>
-                    <button type="button" mat-raised-button *ngIf="(userRole$ | async)?.addressbook.delete"
-                        (click)="showFileUpload=!showFileUpload" color="primary">Upload File</button>
                 </mat-expansion-panel>
             </mat-accordion>
         </div>
@@ -382,7 +249,7 @@
         <span class="med-spacer"></span>
         <span class="med-spacer"></span>
         <span class="med-spacer"></span>
-        <span matTooltip="Add new Work Order">
+        <span matTooltip="Add New Job">
             <mat-icon color="primary" (click)="toggle('addMode')">add</mat-icon>
         </span>
         <span class="small-spacer"></span>
@@ -397,18 +264,26 @@
     </div>
     <div class="example-container mat-elevation-z8">
         <mat-table [dataSource]="dataSource" matSort>
-            <ng-container matColumnDef="campaignType">
-                <mat-header-cell *matHeaderCellDef mat-sort-header>Work Order Type</mat-header-cell>
-                <mat-cell *matCellDef="let row"> {{row.campaignType}} </mat-cell>
+            <ng-container matColumnDef="jobCat">
+                <mat-header-cell *matHeaderCellDef mat-sort-header>Job Type</mat-header-cell>
+                <mat-cell *matCellDef="let row"> {{row.jobCat}} </mat-cell>
             </ng-container>
 
-            <ng-container matColumnDef="name">
-                <mat-header-cell *matHeaderCellDef mat-sort-header>Name</mat-header-cell>
-                <mat-cell *matCellDef="let row"> {{row.name}} </mat-cell>
+            <ng-container matColumnDef="orderName">
+                <mat-header-cell *matHeaderCellDef mat-sort-header>Job Name</mat-header-cell>
+                <mat-cell *matCellDef="let row"> {{row.orderName}} </mat-cell>
             </ng-container>
-            <ng-container matColumnDef="campaignID">
-                <mat-header-cell *matHeaderCellDef mat-sort-header>ID</mat-header-cell>
-                <mat-cell *matCellDef="let row"> {{row.campaignID}} </mat-cell>
+            <ng-container matColumnDef="status">
+                <mat-header-cell *matHeaderCellDef mat-sort-header>Job Status</mat-header-cell>
+                <mat-cell *matCellDef="let row"> {{row.status}} </mat-cell>
+            </ng-container>
+            <ng-container matColumnDef="purpose">
+                <mat-header-cell *matHeaderCellDef mat-sort-header>Purpose</mat-header-cell>
+                <mat-cell *matCellDef="let row"> {{row.purpose}} </mat-cell>
+            </ng-container>
+            <ng-container matColumnDef="updatedAt">
+                <mat-header-cell *matHeaderCellDef mat-sort-header>Updated Date </mat-header-cell>
+                <mat-cell *matCellDef="let row"> {{row.updatedAt}} </mat-cell>
             </ng-container>
             <ng-container matColumnDef="_id">
                 <mat-header-cell *matHeaderCellDef> action </mat-header-cell>

@@ -7,7 +7,7 @@
             <form #searchFormData="ngForm" class="example-form">
                 <mat-card-actions align="start">
                     <button type="button" (click)="toggle('resMode');getData(searchFormData.value);" mat-raised-button
-                        [disabled]="(name.value == '' && campaignID.value == '') || !searchFormData.valid"
+                        [disabled]="(name.value == '' && OrderID.value == '') || !searchFormData.valid"
                         color="primary">Search</button>
                     <span class="med-spacer"></span>
                     <span matTooltip="add new contact">
@@ -20,15 +20,15 @@
                 </mat-card-actions>
                 <mat-form-field class="example-form">
                     <input matInput type="text" placeholder="Order Name" id="name" name="name" #name="ngModel" ngModel
-                        [disabled]="campaignID.value !== ''">
+                        [disabled]="OrderID.value !== ''">
                 </mat-form-field>
                 <mat-error *ngIf="name.invalid && (name.dirty || name.touched)">Please enter a valid Order.</mat-error>
                 <br>
                 <mat-form-field class="example-form">
-                    <input matInput type="text" placeholder="Order #" id="campaignID" name="campaignID"
-                        #campaignID="ngModel" ngModel [disabled]="name.value !== ''" pattern="^[a-z0-9_-]{8,15}$">
+                    <input matInput type="text" placeholder="Order #" id="OrderID" name="OrderID"
+                        #OrderID="ngModel" ngModel [disabled]="name.value !== ''" pattern="^[a-z0-9_-]{8,15}$">
                 </mat-form-field>
-                <mat-error *ngIf="campaignID.invalid && (campaignID.dirty || campaignID.touched)">Please enter a valid
+                <mat-error *ngIf="OrderID.invalid && (OrderID.dirty || OrderID.touched)">Please enter a valid
                     Order #.</mat-error>
             </form>
         </div>
@@ -63,11 +63,8 @@
                 <input matInput placeholder="Name" formControlName="name" required>
             </mat-form-field>
             <mat-form-field>
-                <input matInput placeholder="Order ID #" formControlName="campaignID" required>
-            </mat-form-field>
-            <mat-form-field>
                 <mat-label>Contact Type</mat-label>
-                <mat-select formControlName="campaignType">
+                <mat-select formControlName="OrderType">
                     <mat-option *ngFor="let c of contacts" [value]="c">
                         {{ c }}
                     </mat-option>
@@ -123,10 +120,51 @@
                             (click)="addAddress('addDataForm')">add</mat-icon>
                     </div>
                 </mat-expansion-panel>
+             
                 <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = false">
                     <mat-expansion-panel-header>
                         <mat-panel-title>
-                            Assignments
+                            Order Items
+                        </mat-panel-title>
+                        <mat-panel-description>
+                        </mat-panel-description>
+                    </mat-expansion-panel-header>
+                    <div formArrayName="orderItems">
+                        <div *ngFor="let item of addDataForm.get('orderItems')?.controls; let pointIndex=index"
+                            [formGroupName]="pointIndex">
+                            <mat-form-field>
+                                <mat-label>Product Category</mat-label>
+                                <mat-select formControlName="prodCat" (selectionChange)="filterProducts($event.value)">
+                                    <mat-option *ngFor="let c of productCat" [value]="c.name">
+                                        {{ c.name }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-form-field>
+                                <mat-label>Product Name</mat-label>
+                                <mat-select formControlName="prodName">
+                                    <mat-option *ngFor="let c of products" [value]="c.name">
+                                        {{ c.name }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-form-field>
+                                <input matInput placeholder="quantity" formControlName="quantity" (blur)="calculateSubtotal(pointIndex)" required>
+                            </mat-form-field>
+                            <mat-form-field>
+                                <input matInput placeholder="subtotal" formControlName="subtotal" disabled>
+                            </mat-form-field>
+                            <mat-icon color="warn" *ngIf="(userRole$ | async)?.addressbook.delete"
+                                (click)="deleteExpenses(pointIndex,'addDataForm')">delete</mat-icon>
+                        </div>
+                        <mat-icon color="primary" *ngIf="(userRole$ | async)?.addressbook.delete"
+                            (click)="addExpenses('addDataForm')">add</mat-icon>
+                    </div>
+                </mat-expansion-panel>
+                <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = false">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title>
+                            Assign
                         </mat-panel-title>
                         <mat-panel-description>
                         </mat-panel-description>
@@ -138,13 +176,10 @@
                             <mat-form-field>
                                 <mat-label>Assigned To</mat-label>
                                 <mat-select formControlName="assignedtype">
-                                    <mat-option *ngFor="let a of assignedTypes" [value]="a">
-                                        {{ a }}
+                                    <mat-option *ngFor="let a of users" [value]="a">
+                                        {{ a.name }}
                                     </mat-option>
                                 </mat-select>
-                            </mat-form-field>
-                            <mat-form-field>
-                                <input matInput placeholder="Assigned to" formControlName="assigned">
                             </mat-form-field>
                             <mat-icon color="warn" *ngIf="(userRole$ | async)?.addressbook.delete"
                                 (click)="deleteAssigned(pointIndex,'addDataForm')">delete</mat-icon>
@@ -153,35 +188,6 @@
                             (click)="addAssigned('addDataForm')">add</mat-icon>
                     </div>
 
-                </mat-expansion-panel>
-                <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = false">
-                    <mat-expansion-panel-header>
-                        <mat-panel-title>
-                            Expenses
-                        </mat-panel-title>
-                        <mat-panel-description>
-                        </mat-panel-description>
-                    </mat-expansion-panel-header>
-                    <div formArrayName="expenses">
-                        <div *ngFor="let item of addDataForm.get('expenses')?.controls; let pointIndex=index"
-                            [formGroupName]="pointIndex">
-                            <mat-form-field>
-                                <mat-label>Expense Type</mat-label>
-                                <mat-select formControlName="expensestype">
-                                    <mat-option *ngFor="let a of expenseTypes" [value]="a">
-                                        {{ a }}
-                                    </mat-option>
-                                </mat-select>
-                            </mat-form-field>
-                            <mat-form-field>
-                                <input matInput placeholder="Expenses" formControlName="expenses">
-                            </mat-form-field>
-                            <mat-icon color="warn" *ngIf="(userRole$ | async)?.addressbook.delete"
-                                (click)="deleteExpenses(pointIndex,'addDataForm')">delete</mat-icon>
-                        </div>
-                        <mat-icon color="primary" *ngIf="(userRole$ | async)?.addressbook.delete"
-                            (click)="addExpenses('addDataForm')">add</mat-icon>
-                    </div>
                 </mat-expansion-panel>
             </mat-accordion>
         </div>
@@ -215,11 +221,8 @@
                 <input matInput placeholder="Name" formControlName="name" required>
             </mat-form-field>
             <mat-form-field>
-                <input matInput placeholder="Order ID #" formControlName="campaignID" required>
-            </mat-form-field>
-            <mat-form-field>
                 <mat-label>Contact Type</mat-label>
-                <mat-select formControlName="campaignType">
+                <mat-select formControlName="OrderType">
                     <mat-option *ngFor="let c of contacts" [value]="c">
                         {{ c }}
                     </mat-option>
@@ -276,58 +279,40 @@
                             (click)="addAddress('editDataForm')">add</mat-icon>
                     </div>
                 </mat-expansion-panel>
+              
                 <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = false">
                     <mat-expansion-panel-header>
                         <mat-panel-title>
-                            Assignments
+                            Order Items
                         </mat-panel-title>
                         <mat-panel-description>
                         </mat-panel-description>
                     </mat-expansion-panel-header>
 
-                    <div formArrayName="assigned">
-                        <div *ngFor="let item of editDataForm.get('assigned')?.controls; let pointIndex=index"
+                    <div formArrayName="orderItems">
+                        <div *ngFor="let item of editDataForm.get('orderItems')?.controls; let pointIndex=index"
                             [formGroupName]="pointIndex">
                             <mat-form-field>
-                                <mat-label>Assigned To</mat-label>
-                                <mat-select formControlName="assignedtype">
-                                    <mat-option *ngFor="let a of assignedTypes" [value]="a">
-                                        {{ a }}
+                                <mat-label>Product Category</mat-label>
+                                <mat-select formControlName="prodCat">
+                                    <mat-option *ngFor="let c of productCat" [value]="c.name">
+                                        {{ c.name }}
                                     </mat-option>
                                 </mat-select>
                             </mat-form-field>
                             <mat-form-field>
-                                <input matInput placeholder="Assigned to" formControlName="assigned">
-                            </mat-form-field>
-                            <mat-icon color="warn" *ngIf="(userRole$ | async)?.addressbook.delete"
-                                (click)="deleteAssigned(pointIndex,'editDataForm')">delete</mat-icon>
-                        </div>
-                        <mat-icon color="primary" *ngIf="(userRole$ | async)?.addressbook.delete"
-                            (click)="addAssigned('editDataForm')">add</mat-icon>
-                    </div>
-
-                </mat-expansion-panel>
-                <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = false">
-                    <mat-expansion-panel-header>
-                        <mat-panel-title>
-                            Expenses
-                        </mat-panel-title>
-                        <mat-panel-description>
-                        </mat-panel-description>
-                    </mat-expansion-panel-header>
-                    <div formArrayName="expenses">
-                        <div *ngFor="let item of editDataForm.get('expenses')?.controls; let pointIndex=index"
-                            [formGroupName]="pointIndex">
-                            <mat-form-field>
-                                <mat-label>Expense Type</mat-label>
-                                <mat-select formControlName="expensestype">
-                                    <mat-option *ngFor="let a of expenseTypes" [value]="a">
-                                        {{ a }}
+                                <mat-label>Product Name</mat-label>
+                                <mat-select formControlName="prodName">
+                                    <mat-option *ngFor="let c of products" [value]="c.name">
+                                        {{ c.name }}
                                     </mat-option>
                                 </mat-select>
                             </mat-form-field>
                             <mat-form-field>
-                                <input matInput placeholder="Expenses" formControlName="expenses">
+                                <input matInput placeholder="quantity" formControlName="quantity" required>
+                            </mat-form-field>
+                            <mat-form-field>
+                                <input matInput placeholder="subtotal" formControlName="subtotal" required>
                             </mat-form-field>
                             <mat-icon color="warn" *ngIf="(userRole$ | async)?.addressbook.delete"
                                 (click)="deleteExpenses(pointIndex,'editDataForm')">delete</mat-icon>
@@ -372,6 +357,34 @@
                     <button type="button" mat-raised-button *ngIf="(userRole$ | async)?.addressbook.delete"
                         (click)="showFileUpload=!showFileUpload" color="primary">Upload File</button>
                 </mat-expansion-panel>
+                <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = false">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title>
+                            Assign
+                        </mat-panel-title>
+                        <mat-panel-description>
+                        </mat-panel-description>
+                    </mat-expansion-panel-header>
+
+                    <div formArrayName="assigned">
+                        <div *ngFor="let item of editDataForm.get('assigned')?.controls; let pointIndex=index"
+                            [formGroupName]="pointIndex">
+                            <mat-form-field>
+                                <mat-label>Assigned To</mat-label>
+                                <mat-select formControlName="assignedtype">
+                                    <mat-option *ngFor="let a of users" [value]="a">
+                                        {{ a.name }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-icon color="warn" *ngIf="(userRole$ | async)?.addressbook.delete"
+                                (click)="deleteAssigned(pointIndex,'editDataForm')">delete</mat-icon>
+                        </div>
+                        <mat-icon color="primary" *ngIf="(userRole$ | async)?.addressbook.delete"
+                            (click)="addAssigned('editDataForm')">add</mat-icon>
+                    </div>
+
+                </mat-expansion-panel>
             </mat-accordion>
         </div>
     </form>
@@ -397,18 +410,18 @@
     </div>
     <div class="example-container mat-elevation-z8">
         <mat-table [dataSource]="dataSource" matSort>
-            <ng-container matColumnDef="campaignType">
+            <ng-container matColumnDef="OrderType">
                 <mat-header-cell *matHeaderCellDef mat-sort-header>Order Type</mat-header-cell>
-                <mat-cell *matCellDef="let row"> {{row.campaignType}} </mat-cell>
+                <mat-cell *matCellDef="let row"> {{row.OrderType}} </mat-cell>
             </ng-container>
 
             <ng-container matColumnDef="name">
                 <mat-header-cell *matHeaderCellDef mat-sort-header>Name</mat-header-cell>
                 <mat-cell *matCellDef="let row"> {{row.name}} </mat-cell>
             </ng-container>
-            <ng-container matColumnDef="campaignID">
+            <ng-container matColumnDef="OrderID">
                 <mat-header-cell *matHeaderCellDef mat-sort-header>ID</mat-header-cell>
-                <mat-cell *matCellDef="let row"> {{row.campaignID}} </mat-cell>
+                <mat-cell *matCellDef="let row"> {{row.OrderID}} </mat-cell>
             </ng-container>
             <ng-container matColumnDef="_id">
                 <mat-header-cell *matHeaderCellDef> action </mat-header-cell>

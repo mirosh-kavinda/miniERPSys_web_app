@@ -19,7 +19,6 @@ import { FormBuilder, FormGroup, FormArray, FormControl, Validators } from '@ang
 })
 export class AddCategoryComponent implements OnInit, OnDestroy {
   panelOpenState = false;
-  products = ['Personal', 'Customer', 'Manufacturer', 'Vendor', 'Other', 'Campaign', 'Lead', 'Oppurtunity'];
   
   members: any[];
   dataSource: MatTableDataSource<any>;
@@ -40,7 +39,7 @@ export class AddCategoryComponent implements OnInit, OnDestroy {
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
-  displayedColumns = ['name', 'area', '_id'];
+  displayedColumns = ['catType','name', '_id'];
   // file upload
   docId: string;
   fileName: string;
@@ -60,12 +59,12 @@ export class AddCategoryComponent implements OnInit, OnDestroy {
     this.dataSource = new MatTableDataSource(this.members);
     this.addDataForm = this._fb.group({
       name: ['', [Validators.minLength(2), Validators.required]],
-      area: ['', [Validators.required]],
+      catType: ['', [Validators.required]],
     });
     this.editDataForm = this._fb.group({
       _id: ['', Validators.required],
       name: ['', [Validators.minLength(2), Validators.required]],
-      area: ['', [Validators.required]],
+      catType: ['', [Validators.required]],
     });
     this.afAuth.authState.subscribe(authState => {
       this.authState = authState;
@@ -82,7 +81,7 @@ export class AddCategoryComponent implements OnInit, OnDestroy {
 
   getData(formData?) {
     this.dataLoading = true;
-    this.querySubscription = this._backendService.getDocs('PRODUCTCATEGOR', formData).subscribe((res) => {
+    this.querySubscription = this._backendService.getDocs('PRODUCTCATEGORY', formData).subscribe((res) => {
       if (res.length > 0) {
         this.dataSource = new MatTableDataSource(res);
         this.dataSource.paginator = this.paginator;
@@ -101,7 +100,6 @@ export class AddCategoryComponent implements OnInit, OnDestroy {
 
   setData(formData) {
     this.dataLoading = true;
-    console.log("hello")
     return this._backendService.setDoc('PRODUCTCATEGORY', formData, this.authState.uid).then(res => {
       if (res) {
         this.savedChanges = true;

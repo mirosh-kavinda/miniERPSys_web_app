@@ -25,9 +25,9 @@
         <mat-error *ngIf="name.invalid && (name.dirty || name.touched)">Please enter a valid name.</mat-error>
         <br>
         <mat-form-field class="example-form">
-          <input matInput type="text" placeholder="Category Area" id="area" name="area" #area="ngModel" ngModel [disabled]="area.value !== ''">
+          <input matInput type="text" placeholder="Category Type" id="catType" name="catType" #catType="ngModel" ngModel [disabled]="catType.value !== ''">
         </mat-form-field>
-        <mat-error *ngIf="area.invalid && (area.dirty || area.touched)">Please enter a valid Category Area.</mat-error>
+        <mat-error *ngIf="catType.invalid && (catType.dirty || catType.touched)">Please enter a valid Category Type.</mat-error>
       </form>
     </div>
   </mat-card-content>
@@ -44,9 +44,6 @@
       <mat-progress-bar mode="indeterminate" *ngIf="dataLoading"></mat-progress-bar>
       <mat-error *ngIf="error">Error: {{ errorMessage }}</mat-error>
       <mat-card-actions align="start">
-        <button type="submit" mat-raised-button color="primary" [disabled]="!addDataForm.valid">New Category</button>
-        <button type="reset" (click)="this.addDataForm.reset();" mat-raised-button [disabled]="!addDataForm.valid" color="primary">Clear</button>
-        <span class="med-spacer"></span>
         <span matTooltip="Search">
           <mat-icon color="primary" (click)="toggle('searchMode')">search</mat-icon>
         </span>
@@ -60,9 +57,14 @@
         <input matInput placeholder="*Category Name" formControlName="name" required>
       </mat-form-field>
       <mat-form-field>
-        <input matInput placeholder="*Category Area" formControlName="area" required>
+        <input matInput placeholder="*Category Type" formControlName="catType" required>
       </mat-form-field>
     </div>
+    <mat-card-actions align="start">
+      <button type="submit" mat-raised-button color="primary" [disabled]="!addDataForm.valid">Add New Category</button>
+      <button type="reset" (click)="this.addDataForm.reset();" mat-raised-button [disabled]="!addDataForm.valid" color="primary">Clear</button>
+      <span class="med-spacer"></span>
+      </mat-card-actions>
   </form>
 </ng-template>
 <!-- edit mode -->
@@ -90,10 +92,10 @@
         </span>
       </mat-card-actions>
       <mat-form-field>
+        <input matInput placeholder="Category Type #" formControlName="catType" required>
+      </mat-form-field>
+      <mat-form-field>
           <input matInput placeholder="Category Name" formControlName="name" required>
-        </mat-form-field>
-        <mat-form-field>
-          <input matInput placeholder="Category Area #" formControlName="area" required>
         </mat-form-field>
     </div>
   </form>
@@ -119,20 +121,16 @@
   </div>
   <div class="example-container mat-elevation-z8">
     <mat-table [dataSource]="dataSource" matSort>
-      <ng-container matColumnDef="producttype">
-        <mat-header-cell *matHeaderCellDef mat-sort-header>Category Type</mat-header-cell>
-        <mat-cell *matCellDef="let row"> {{row.producttype}} </mat-cell>
-      </ng-container>
 
+      <ng-container matColumnDef="catType">
+        <mat-header-cell *matHeaderCellDef mat-sort-header>Category Type</mat-header-cell>
+        <mat-cell *matCellDef="let row"> {{row.catType}} </mat-cell>
+      </ng-container>
+      
       <ng-container matColumnDef="name">
         <mat-header-cell *matHeaderCellDef mat-sort-header>Name</mat-header-cell>
         <mat-cell *matCellDef="let row"> {{row.name}} </mat-cell>
       </ng-container>
-      <ng-container matColumnDef="quantity">
-        <mat-header-cell *matHeaderCellDef mat-sort-header>Area</mat-header-cell>
-        <mat-cell *matCellDef="let row"> {{row.area}} </mat-cell>
-      </ng-container>
-     
       <ng-container matColumnDef="_id">
         <mat-header-cell *matHeaderCellDef> action </mat-header-cell>
         <mat-cell *matCellDef="let row">

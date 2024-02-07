@@ -30,6 +30,7 @@
               
             ],
             "scripts": [
+              "node_modules/firebase/dist/index.esm.js",
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
             ]
           },
@@ -52,7 +53,7 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "2mb",
+                  "maximumWarning": "3  mb",
                   "maximumError": "5mb"
                 },
                 {

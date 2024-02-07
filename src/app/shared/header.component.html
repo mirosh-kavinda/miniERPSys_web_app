@@ -16,12 +16,12 @@
       </div>
       <div mat-subheader *ngIf="(data$ | async)?.product.visible">
         <button mat-menu-item routerLink="/addproduct">
-          <mat-icon class="circle-link example-icon-link">import_product</mat-icon>Add Product
+          <mat-icon class="circle-link example-icon-link">library_add</mat-icon>Add Product
         </button>
       </div>
       <div mat-subheader *ngIf="(data$ | async)?.product.visible">
         <button mat-menu-item routerLink="/addcategory">
-          <mat-icon class="circle-link example-icon-link">Category</mat-icon>Add Category
+          <mat-icon class="circle-link example-icon-link">playlist_add</mat-icon>Add Category
         </button>
       </div>
       <div mat-subheader *ngIf="(data$ | async)?.addressbook.visible">
@@ -31,7 +31,7 @@
       </div>
       <div mat-subheader *ngIf="(data$ | async)?.addressbook.visible">
         <button mat-menu-item [matMenuTriggerFor]="bpoMenu">
-          <mat-icon class="circle-link example-icon-link">sms</mat-icon>BPO call center
+          <mat-icon class="circle-link example-icon-link">sms</mat-icon>Call center
         </button>
       </div>
       <div mat-subheader *ngIf="(data$ | async)?.admin.visible">
@@ -105,14 +105,14 @@
   </div>
   <div mat-subheader>
     <mat-divider></mat-divider>
-    <button mat-menu-item routerLink="/workorder">
-      Work Orders
+    <button mat-menu-item routerLink="/order">
+      Order Fulfilllment
     </button>
   </div>
   <div mat-subheader>
     <mat-divider></mat-divider>
-    <button mat-menu-item routerLink="/order">
-      Order Fulfilllment
+    <button mat-menu-item routerLink="/job">
+      Job Scheduling
     </button>
   </div>
 </mat-menu>

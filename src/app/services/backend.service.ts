@@ -1,19 +1,21 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { AngularFireAuth } from '@angular/fire/auth';
-// import { auth } from 'firebase/app';
 import auth from 'firebase';
 import { AngularFirestore, AngularFirestoreDocument } from '@angular/fire/firestore';
 import { AngularFireStorage } from '@angular/fire/storage';
-// import { firestore } from 'firebase/app';
 import firestore from 'firebase';
-import { Subject }    from 'rxjs';
+import {Subject }    from 'rxjs';
+
+
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class BackendService {
   configData;
+  private querySubscription;
   private userRoleSource = new Subject<string>();
   userRole$ = this.userRoleSource.asObservable();
 
@@ -139,4 +141,20 @@ return this.afAuth.signInWithEmailAndPassword(formData.data.email, formData.data
   setRole(role) {
     this.userRoleSource.next(role);
   }
+ 
+
+  getData(formData?) {
+    this.querySubscription = this.getDocs('PRODUCTS', formData).subscribe((res) => {
+      if (res.length > 0) {
+     
+      }
+    },
+      (error) => {
+       
+      },
+      () => {
+        
+      });
+  }
+
 }

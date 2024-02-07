@@ -19,12 +19,13 @@ import { FormBuilder, FormGroup, FormArray, FormControl, Validators } from '@ang
 })
 export class AddProductComponent implements OnInit, OnDestroy {
   panelOpenState = false;
-  products = ['Personal', 'Customer', 'Manufacturer', 'Vendor', 'Other', 'Campaign', 'Lead', 'Oppurtunity'];
   
   members: any[];
   dataSource: MatTableDataSource<any>;
   myDocData;
   data$;
+  products;
+  dockerdata;
   toggleField: string;
   state: string = '';
   savedChanges = false;
@@ -74,13 +75,15 @@ export class AddProductComponent implements OnInit, OnDestroy {
     this.afAuth.authState.subscribe(authState => {
       this.authState = authState;
     })
+
+    this._backendService.getDocs("PRODUCTCATEGORY").subscribe((res) => {
+      if (res.length > 0) {
+     this.products=res;
+      };
+    });
+  
   }
 
-
-
-
-
- 
 
   toggle(filter?) {
     if (!filter) { filter = "searchMode" }
@@ -132,6 +135,7 @@ export class AddProductComponent implements OnInit, OnDestroy {
 
   updateData(formData) {
     this.dataLoading = true;
+    console.log(this.dockerdata);
     this.querySubscription = this._backendService.updateDoc('PRODUCTS', formData._id, formData).then(res => {
       if (res) {
         this.savedChanges = true;

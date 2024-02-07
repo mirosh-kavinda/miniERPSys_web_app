@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Management </title>
+  <!-- Bootstrap CSS -->
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../Assets/css/bootstrap.min.css">
+  <link type="text/css" rel="stylesheet" href="../Assets/css/style.css">
+  <!-- Custom styles for this template-->
+  <link href="../css/sb-admin-2.min.css" rel="stylesheet">
+  <link href="../vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+  <link
+    href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+    rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.14.6/firebase-database.js"></script>
+  <script src="../Assets/js/firebase.js"></script>
+  <script src="../Assets/js/functions.js"></script>
+  <script src="../Assets/js/fetch.js"></script>
+
+</head>
+
+<body id="page-top">
+  <div id="wrapper">
+    <ul class="navbar-nav bg-gradient-secondary sidebar sidebar-dark accordion" id="accordionSidebar">
+      <!-- Sidebar - Brand -->
+      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="../index.html">
+        <div class="sidebar-brand-icon rotate-n-15">
+          <i class="fas fa-calculator "></i>
+        </div>
+        <div class="sidebar-brand-text mx-3">CountMeIn</sup></div>
+      </a>
+      <br>
+      <br>
+      <li class="nav-item active">
+        <a class="nav-link" href="../analysys.html">
+          <i class="fas fa-fw fa-tachometer-alt"></i>
+          <span>Analysys</span></a>
+
+      </li>
+      <hr class="sidebar-divider">
+
+      <li class="nav-item active">
+        <a class="nav-link" href="../order_management/index.html">
+          <i class="fab fa-product-hunt"></i>
+          <span>Order Management</span></a>
+      </li>
+      <li class="nav-item active">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseOrder" aria-expanded="true"
+          aria-controls="collapseOrder">
+          <span>Stock Management</span>
+        </a>
+      </li>
+      <!-- Divider -->
+
+      <!-- Nav Item - Pages Collapse Menu -->
+      <hr class="sidebar-divider">
+      <!-- Nav Item - Pages Collapse Menu -->
+      <li class="nav-item active">
+        <a class="nav-link" href="../job_management/index.html">
+          <i class="fab fa-product-hunt"></i>
+          <span>Job Management</span></a>
+      </li>
+      <!-- Divider -->
+      <hr class="sidebar-divider">
+
+
+      <li class="nav-item active">
+        <a class="nav-link" href="../dispatch_Management/index.html">
+          <i class="fab fa-product-hunt"></i>
+          <span>Dispatch Management</span></a>
+      </li>
+      <!-- Divider -->
+      <hr class="sidebar-divider">
+
+      <!-- Sidebar Toggler (Sidebar) -->
+      <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+      </div>
+
+    </ul>
+
+    <div class="container mt-4 p-3">
+      <h2 class="mb-4">Steel Quantity Calculator</h2>
+      <div class="form-row">
+        <div class="form-group col-md-4">
+          <label for="productCategory">Product Category</label>
+          <select class="form-control" id="productCategory">
+          </select>
+        </div>
+        <div class="form-group col-md-4">
+          <label for="product">Product </label>
+          <select class="form-control" id="jobproduct" aria-selected="false" aria-placeholder="Select">
+            <option value="8mm">8mm</option>
+            <option value="10mm">10mm</option>
+            <option value="12mm">12mm</option>
+            <option value="16mm">16mm</option>
+            <option value="20mm">20mm</option>
+          </select>
+        </div>
+
+        <div class="col">
+          <label for="packageweight">Package Net Weight</label>
+          <div class="input-group ">
+            <input type="number" class="form-control" id="packageweight" placeholder="Enter WeightBridge Readings">
+            <div class="input-group-append">
+              <select class="custom-select" id="Metric">
+                <option value="Kg">Kg</option>
+                <option value="T">T</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group col-md-4">
+          <label for="stealquantity">Quantity</label>
+          <input type="text" class="form-control" id="stealquantity" readonly>
+        </div>
+      </div>
+      <button type="button" id="calcBtn"class="btn btn-primary" onclick="calculateSteelQuantity()">Calculate</button>
+      <a class="btn btn-success" onclick="AddJob()">Continue to Add Job</a>
+
+
+      <div id="addedjob" style="display: none">
+        <h2 class="mb-4 mt-3">Add a Job for Counting</h2>
+        <div class="card shadow p-4 ">
+          <div class="row">
+            <div class="col">
+              <label for="pname">OrderId </label>
+              <select class="form-control" id="orderId">
+                <option value="1">10</option>
+                <option value="2">11</option>
+                <option value="3">14</option>
+              </select>
+            </div>
+            <div class="col">
+              <label for="jobCat">Job Category</label>
+              <select class="form-control" aria-placeholder="select Job Cat." id="jobCat">
+                <option value="1">Count Steal</option>
+                <option value="2">job2</option>
+                <option value="3">Job3</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <label for="pname">Job Comment</label>
+              <input required type="text" class="form-control" id="Jobcomment" placeholder="Enter Job Comment" />
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <label for="jobstealcount">Stealcount</label>
+              <input required type="number" class="form-control" id="jobstealcount" placeholder="Enter StealCount"readonly />
+            </div>
+          </div>
+          <br /><br />
+          <div class="row">
+            <a class="btn btn-success col" onclick="jobAdd()">Add JOB</a>
+          </div>
+          <br />
+        </div>
+      </div>
+
+
+      <div id="displayjob" style="display: none">
+        <h4>Recent Jobs</h4>
+        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+          <thead>
+            <tr>
+              <th>JobId</th>
+              <th>Jobcomment</th>
+              <th>Stealcount</th>
+              <th>jobCat</th>
+              <th>orderId</th>
+              <th>jobStatus</th>
+              <th>jobDate</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="tableJob"></tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Custom scripts for all pages-->
+    <!-- <script src="../js/sb-admin-2.min.js"></script> -->
+    <script src="../vendor/jquery-easing/jquery.easing.min.js"></script>
+</body>
+
+</html>

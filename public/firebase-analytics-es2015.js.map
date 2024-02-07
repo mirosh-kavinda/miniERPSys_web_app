@@ -1,0 +1,1 @@
+{"version":3,"sources":["./node_modules/firebase/analytics/dist/index.esm.js"],"names":[],"mappings":";;;;;;;;;;AAAA;AAAA;AAA6B;AAC7B","file":"firebase-analytics-es2015.js","sourcesContent":["import '@firebase/analytics';\n//# sourceMappingURL=index.esm.js.map\n"],"sourceRoot":"webpack:///"}

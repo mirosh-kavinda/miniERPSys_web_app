@@ -72,6 +72,7 @@ import { HomeComponent } from './ui/home/home.component';
 import { LandingComponent } from './ui/landing/landing.component';
 import { AddProductComponent } from './ui/addProduct/addproduct.component';
 import { AddCategoryComponent } from './ui/addCategory/addcategorycomponent';
+import { CommonModule } from '@angular/common';
 // import { MatCarouselModule } from '@';
 
 @NgModule({
@@ -145,6 +146,7 @@ import { AddCategoryComponent } from './ui/addCategory/addcategorycomponent';
     MatSlideToggleModule,
     MatSidenavModule,
     MatDatepickerModule,
+    CommonModule,
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAnalyticsModule,
     AngularFirestoreModule
