@@ -19,7 +19,7 @@ import { FormBuilder, FormGroup, FormArray, FormControl, Validators } from '@ang
 })
 export class AddCategoryComponent implements OnInit, OnDestroy {
   panelOpenState = false;
-  
+  configData;
   members: any[];
   dataSource: MatTableDataSource<any>;
   myDocData;
@@ -53,7 +53,14 @@ export class AddCategoryComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.toggleField = "searchMode";
+    this.toggle('resMode')
+    this.getData();
+    this.configData = this._backendService.getConfig("helptext");
+    this.afAuth.authState.subscribe(authState => {
+      this.authState = authState;
+      this.getUserDoc();
+      
+    })
     this.error = false;
     this.errorMessage = "";
     this.dataSource = new MatTableDataSource(this.members);
@@ -70,7 +77,18 @@ export class AddCategoryComponent implements OnInit, OnDestroy {
       this.authState = authState;
     })
   }
-
+  getUserDoc() {
+    return this._backendService.getDoc("USERS", this.authState.uid).subscribe(
+      (res) => {
+        if (res) {
+          this.data$ = this._backendService.getDoc("ROLES", res["role"]);
+          this._backendService.setRole(this.data$);
+        }
+      },
+      error => {},
+      () => console.log("")
+    );
+  }
 
   toggle(filter?) {
     if (!filter) { filter = "searchMode" }

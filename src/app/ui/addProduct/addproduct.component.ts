@@ -49,28 +49,40 @@ export class AddProductComponent implements OnInit, OnDestroy {
   showDocument: boolean = false;
   docUrl: Observable<string | null>;
   userRole$;
-
+  configData;
   constructor(public afAuth: AngularFireAuth, private _backendService: BackendService, private _fb: FormBuilder) {
     this._backendService.userRole$.subscribe(res => this.userRole$ = res);
   }
 
   ngOnInit() {
-    this.toggleField = "searchMode";
+    this.toggle('resMode')
+    this.getData();
+
+    this.configData = this._backendService.getConfig("helptext");
+    this.afAuth.authState.subscribe(authState => {
+      this.authState = authState;
+      this.getUserDoc();
+      
+    })
     this.error = false;
     this.errorMessage = "";
     this.dataSource = new MatTableDataSource(this.members);
     this.addDataForm = this._fb.group({
       name: ['', [Validators.minLength(2), Validators.required]],
       producttype: ['', [Validators.required]],
+      variants: this._fb.array([]),
       quantity:  ['', [Validators.required]],
       unitprice:  ['', [Validators.required]],
+      images: this._fb.array([]),
     });
     this.editDataForm = this._fb.group({
       _id: ['', Validators.required],
       name: ['', [Validators.minLength(2), Validators.required]],
       producttype: ['', [Validators.required]],
+      variants: this._fb.array([]),
       quantity:  ['', [Validators.required]],
       unitprice:  ['', [Validators.required]],
+      images: this._fb.array([]),
     });
     this.afAuth.authState.subscribe(authState => {
       this.authState = authState;
@@ -82,6 +94,18 @@ export class AddProductComponent implements OnInit, OnDestroy {
       };
     });
   
+  }
+  getUserDoc() {
+    return this._backendService.getDoc("USERS", this.authState.uid).subscribe(
+      (res) => {
+        if (res) {
+          this.data$ = this._backendService.getDoc("ROLES", res["role"]);
+          this._backendService.setRole(this.data$);
+        }
+      },
+      error => {},
+      () => console.log("")
+    );
   }
 
 
@@ -152,7 +176,6 @@ export class AddProductComponent implements OnInit, OnDestroy {
       }
     });
   }
-
   getDoc(docId) {
     this.docId = docId; // this is required to pass at file upload directive
     this.dataLoading = true;
@@ -160,11 +183,13 @@ export class AddProductComponent implements OnInit, OnDestroy {
       if (res) {
         this.data$ = res;
         this.editDataForm = this._fb.group({
-          _id: ['', Validators.required],
-          name: ['', [Validators.minLength(2), Validators.required]],
-          producttype: ['', [Validators.required]],
-          quantity:  ['', [Validators.required]],
-          unitprice:  ['', [Validators.required]],
+          _id: [this.data$._id, Validators.required],
+          name: [this.data$.name, [Validators.minLength(2), Validators.required]],
+          producttype: [this.data$.producttype, [Validators.required]],
+          quantity:  [this.data$.quantity, [Validators.required]],
+          unitprice:  [this.data$.unitprice, [Validators.required]],
+          variants:[this.data$.variants],
+          images: this._fb.array([]),
         });
        
         this.toggle('editMode');
@@ -179,6 +204,17 @@ export class AddProductComponent implements OnInit, OnDestroy {
       () => {
         this.dataLoading = false;
       });
+  }
+  PHONELINES(formName) {
+    return this[formName].get('variants') as FormArray;
+  }
+  addPhone(formName) {
+    this.PHONELINES(formName).push(this._fb.group({
+      variant: ['']
+    }));
+  }
+  deletePhone(index, formName) {
+    this.PHONELINES(formName).removeAt(index);
   }
 
   deleteDoc(docId) {

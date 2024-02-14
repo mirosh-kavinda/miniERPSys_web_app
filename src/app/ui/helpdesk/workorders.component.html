@@ -4,7 +4,7 @@
         <div *ngIf="(toggleField=='searchMode') 
     else (toggleField=='addMode')? showAddMode : ((toggleField=='editMode')? showEditMode : showResMode)">
             <!-- searchmode -->
-            <form #searchFormData="ngForm" class="example-form">
+            <!-- <form #searchFormData="ngForm" class="example-form">
                 <mat-card-actions align="start">
                     <button type="button" (click)="toggle('resMode');getData(searchFormData.value);" mat-raised-button
                         [disabled]="!searchFormData.valid"
@@ -21,8 +21,8 @@
                 <mat-form-field>
                     <mat-label>Job Type</mat-label>
                     <mat-select formControlName="jobCat">
-                        <mat-option *ngFor="let c of orders" [value]="c">
-                            {{ c.campaignType }}
+                        <mat-option *ngFor="let c of stealbars" [value]="c">
+                            {{ c }}
                         </mat-option>
                     </mat-select>
                 </mat-form-field>
@@ -34,7 +34,7 @@
                         </mat-option>
                     </mat-select>
                 </mat-form-field>
-            </form>
+            </form> -->
         </div>
     </mat-card-content>
 </mat-card>
@@ -44,7 +44,7 @@
         <mat-error *ngIf="savedChanges">
             Data is saved.
             <label class="small-spacer"></label>
-            <mat-icon (click)="this.addDataForm.reset();savedChanges=false;toggle('searchMode');">clear</mat-icon>
+            <mat-icon (click)="this.addDataForm.reset();savedChanges=false;toggle('resMode');">clear</mat-icon>
         </mat-error>
         <div *ngIf="!savedChanges">
             <mat-progress-bar mode="indeterminate" *ngIf="dataLoading"></mat-progress-bar>
@@ -54,14 +54,10 @@
                     Work Order</button>
                 <button type="reset" (click)="this.addDataForm.reset();" mat-raised-button
                     [disabled]="!addDataForm.valid" color="primary">Clear</button>
-                <span class="med-spacer"></span>
-                <span matTooltip="Search">
-                    <mat-icon color="primary" (click)="toggle('searchMode')">search</mat-icon>
-                </span>
-                <span class="small-spacer"></span>
-                <span matTooltip="Show Recent Results">
-                    <mat-icon color="primary" (click)="toggle('resMode');getData();">cached</mat-icon>
-                </span>
+        
+                <button type="reset" (click)="toggle('resMode');getData();" mat-raised-button
+             color="primary">Show Recent Jobs</button>
+    
             </mat-card-actions>
            
             <mat-form-field>
@@ -73,27 +69,18 @@
                 </mat-select>
                 
             </mat-form-field>
-            <div (blur)="selectJobCatRelatedData()">
+            <!-- <div (blur)="selectJobCatRelatedData()"> -->
                 <mat-form-field>
                     <mat-label>Job Category</mat-label>
-                    <mat-select formControlName="jobCat"  >
-                        <mat-option *ngFor="let c of jobCat" [value]="c">
+                    <mat-select formControlName="jobCat">
+                        <mat-option *ngFor="let c of jobCat; let i = index" [value]="c" aria-disabled="true">
                             {{ c }}
                         </mat-option>
                     </mat-select>
-                    
                 </mat-form-field>
-            </div>
-            <mat-form-field *ngIf="isStealBarSelect">
-                <mat-label>Steel Bar Variant</mat-label>
-                <mat-select formControlName="variant">
-                    <mat-option *ngFor="let c of stealbars" [value]="c">
-                        {{ c}}
-                    </mat-option>
-                </mat-select>
                 
-            </mat-form-field>
-            <br />
+            <!-- </div> -->
+
             <mat-form-field>
                 <mat-label>Job Status</mat-label>
                 <mat-select formControlName="status">
@@ -103,12 +90,23 @@
                 </mat-select>
                 
             </mat-form-field>
+            <br />
+            <mat-form-field >
+                <mat-label>Steel Bar Variant</mat-label>
+                <mat-select formControlName="steelVariant">
+                    <mat-option *ngFor="let c of stealbars" [value]="c">
+                        {{ c}}
+                    </mat-option>
+                </mat-select>
+                
+            </mat-form-field>
+          
             <mat-form-field>
                 <input matInput placeholder="Enter Weight Of Bundle (Kg)" formControlName="weight" id="bundleWeight" (blur)="calculateSteelQuantity()"   required>
             </mat-form-field>
             <br />
             <mat-form-field>
-                <input matInput placeholder="quantity" disabled formControlName="quantity"  required>
+                <input matInput placeholder="quantity" disabled formControlName="quantity"  id="quantity" >
             </mat-form-field>
             <mat-form-field class="example-full-width">
                 <mat-label>Leave a comment</mat-label>
@@ -154,7 +152,7 @@
         <mat-error *ngIf="savedChanges">
             Data is saved.
             <label class="small-spacer"></label>
-            <mat-icon (click)="this.editDataForm.reset();savedChanges=false;toggle('searchMode');">clear</mat-icon>
+            <mat-icon (click)="this.editDataForm.reset();savedChanges=false;toggle('resMode');">clear</mat-icon>
         </mat-error>
         <div *ngIf="!savedChanges">
             <mat-progress-bar mode="indeterminate" *ngIf="dataLoading"></mat-progress-bar>
@@ -163,13 +161,9 @@
                 <button type="submit" mat-raised-button *ngIf="(userRole$ | async)?.addressbook.write"
                     [disabled]="!this.editDataForm.valid || this.editDataForm.pristine" color="primary">Update</button>
                 <span class="med-spacer"></span>
-                <span matTooltip="Search">
-                    <mat-icon color="primary" (click)="toggle('searchMode')">search</mat-icon>
-                </span>
                 <span class="small-spacer"></span>
-                <span matTooltip="Shwo Recent Results">
-                    <mat-icon color="primary" (click)="toggle('resMode');getData();">cached</mat-icon>
-                </span>
+                <button  mat-raised-button color="primary" (click)="toggle('resMode');getData();"> Show Recent Results</button>
+               
             </mat-card-actions>
             <mat-form-field>
                 <mat-label>Select Order</mat-label>
@@ -189,6 +183,15 @@
                 </mat-select>
                 
             </mat-form-field>
+            <mat-form-field >
+                <mat-label>Steel Bar Variant</mat-label>
+                <mat-select formControlName="steelVariant">
+                    <mat-option *ngFor="let c of stealbars" [value]="c">
+                        {{ c}}
+                    </mat-option>
+                </mat-select>
+                
+            </mat-form-field>
             <br />
             <mat-form-field>
                 <mat-label>Job Status</mat-label>
@@ -200,11 +203,19 @@
                 
             </mat-form-field>
             <mat-form-field>
+                <mat-label>Steel Variant</mat-label>
+                <mat-select formControlName="steelVariant">
+                    <mat-option *ngFor="let c of stealbars" [value]="c">
+                        {{ c}}
+                    </mat-option>
+                </mat-select> 
+            </mat-form-field>
+            <mat-form-field>
                 <input matInput placeholder="Enter Weight Of Bundle (Kg)" formControlName="weight" id="bundleWeight" (blur)="calculateSteelQuantity()"   required>
             </mat-form-field>
             <br />
             <mat-form-field>
-                <input matInput placeholder="quantity" disabled formControlName="quantity"  required>
+                <input matInput placeholder="quantity"  formControlName="quantity"  required>
             </mat-form-field>
             <mat-form-field class="example-full-width">
                 <mat-label>Leave a comment</mat-label>
@@ -245,23 +256,14 @@
 </ng-template>
 <!-- Results mode -->
 <ng-template #showResMode>
-    <mat-card-actions align="start">
-        <span class="med-spacer"></span>
-        <span class="med-spacer"></span>
-        <span class="med-spacer"></span>
-        <span matTooltip="Add New Job">
-            <mat-icon color="primary" (click)="toggle('addMode')">add</mat-icon>
-        </span>
-        <span class="small-spacer"></span>
-        <span matTooltip="Search All">
-            <mat-icon color="primary" (click)="toggle('searchMode')">search</mat-icon>
-        </span>
-    </mat-card-actions>
-    <div class="example-header">
+     <mat-card-actions>
         <mat-form-field>
             <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Search Recent Results">
         </mat-form-field>
-    </div>
+             <button matTooltip="Add New Job" mat-raised-button  color="primary" (click)="toggle('addMode')">
+            Add New Job
+        </button>   
+</mat-card-actions>
     <div class="example-container mat-elevation-z8">
         <mat-table [dataSource]="dataSource" matSort>
             <ng-container matColumnDef="jobCat">
@@ -277,13 +279,17 @@
                 <mat-header-cell *matHeaderCellDef mat-sort-header>Job Status</mat-header-cell>
                 <mat-cell *matCellDef="let row"> {{row.status}} </mat-cell>
             </ng-container>
+            <ng-container matColumnDef="steelVariant">
+                <mat-header-cell *matHeaderCellDef mat-sort-header>Steel Bar Variant</mat-header-cell>
+                <mat-cell *matCellDef="let row"> {{row.steelVariant}} </mat-cell>
+            </ng-container>
             <ng-container matColumnDef="purpose">
                 <mat-header-cell *matHeaderCellDef mat-sort-header>Purpose</mat-header-cell>
                 <mat-cell *matCellDef="let row"> {{row.purpose}} </mat-cell>
             </ng-container>
-            <ng-container matColumnDef="updatedAt">
-                <mat-header-cell *matHeaderCellDef mat-sort-header>Updated Date </mat-header-cell>
-                <mat-cell *matCellDef="let row"> {{row.updatedAt}} </mat-cell>
+            <ng-container matColumnDef="quantity">
+                <mat-header-cell *matHeaderCellDef mat-sort-header>Qty </mat-header-cell>
+                <mat-cell *matCellDef="let row"> {{row.quantity}} </mat-cell>
             </ng-container>
             <ng-container matColumnDef="_id">
                 <mat-header-cell *matHeaderCellDef> action </mat-header-cell>

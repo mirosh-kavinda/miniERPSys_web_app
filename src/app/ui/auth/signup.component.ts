@@ -17,7 +17,8 @@ import auth from 'firebase';
 })
 
 export class SignupComponent implements OnInit {
-
+  errorMessage:string='';
+  authState: any = null;
   state: string = ''; // required for router animation
   dataLoading: boolean = false; // spinner boolean
   IBData: DBInBoundData; // inbound data
@@ -39,28 +40,32 @@ export class SignupComponent implements OnInit {
       recordType: "signup",
       data: ""
     }; // outbound data
+    this.auth.authState.subscribe(authState => {
+      this.authState = authState;
+    })
   }
 
   onSubmit(formData) {
-    this.dataLoading = true;
+
     this.OBData.data = formData;
     return this._backendService.createUser(this.OBData).then(res => {
-        this.IBData.error = false;
-        this.IBData.statusCode =  1;
-        this.IBData.statusMessage =  res.user.email;
-      }).catch(error => {
-        this.IBData.error = true;
-        this.IBData.statusCode =  0;
-        this.IBData.statusMessage =  error;
-      }).finally(() => {
-        this.dataLoading = false;
-      })
-      .then(() => {
-        this._router.navigateByUrl('/home');
-      });
+      this.IBData.error = false;
+      this.IBData.statusCode = 1;
+      this.IBData.statusMessage = res.user.email;
+   
+      
+    
+    }).catch(error => {
+      this.IBData.error = true;
+      this.IBData.statusCode = 0;
+      this.IBData.statusMessage = error;
+    }).finally(() => {
+      this._router.navigateByUrl('/login');
+
+    });
   }
 
-  routeLoginPage() {
-    this._router.navigate(['/login']);
-  }
+
 }
+
+

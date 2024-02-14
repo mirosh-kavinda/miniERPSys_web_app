@@ -4,33 +4,6 @@
         <div *ngIf="(toggleField=='searchMode') 
     else (toggleField=='addMode')? showAddMode : ((toggleField=='editMode')? showEditMode : showResMode)">
             <!-- searchmode -->
-            <form #searchFormData="ngForm" class="example-form">
-                <mat-card-actions align="start">
-                    <button type="button" (click)="toggle('resMode');getData(searchFormData.value);" mat-raised-button
-                        [disabled]="(name.value == '' && OrderID.value == '') || !searchFormData.valid"
-                        color="primary">Search</button>
-                    <span class="med-spacer"></span>
-                    <span matTooltip="add new contact">
-                        <mat-icon color="primary" (click)="toggle('addMode')">add</mat-icon>
-                    </span>
-                    <span class="small-spacer"></span>
-                    <span matTooltip="show Recent Results">
-                        <mat-icon color="primary" (click)="toggle('resMode');getData();">cached</mat-icon>
-                    </span>
-                </mat-card-actions>
-                <mat-form-field class="example-form">
-                    <input matInput type="text" placeholder="Order Name" id="name" name="name" #name="ngModel" ngModel
-                        [disabled]="OrderID.value !== ''">
-                </mat-form-field>
-                <mat-error *ngIf="name.invalid && (name.dirty || name.touched)">Please enter a valid Order.</mat-error>
-                <br>
-                <mat-form-field class="example-form">
-                    <input matInput type="text" placeholder="Order #" id="OrderID" name="OrderID"
-                        #OrderID="ngModel" ngModel [disabled]="name.value !== ''" pattern="^[a-z0-9_-]{8,15}$">
-                </mat-form-field>
-                <mat-error *ngIf="OrderID.invalid && (OrderID.dirty || OrderID.touched)">Please enter a valid
-                    Order #.</mat-error>
-            </form>
         </div>
     </mat-card-content>
 </mat-card>
@@ -50,14 +23,9 @@
                     Order</button>
                 <button type="reset" (click)="this.addDataForm.reset();" mat-raised-button
                     [disabled]="!addDataForm.valid" color="primary">Clear</button>
-                <span class="med-spacer"></span>
-                <span matTooltip="Search">
-                    <mat-icon color="primary" (click)="toggle('searchMode')">search</mat-icon>
-                </span>
-                <span class="small-spacer"></span>
-                <span matTooltip="Show Recent Results">
-                    <mat-icon color="primary" (click)="toggle('resMode');getData();">cached</mat-icon>
-                </span>
+                <button mat-raised-button matTooltip="Show Recent Results" color="primary"(click)="toggle('resMode');getData();">
+                    Show All Records
+                </button>
             </mat-card-actions>
             <mat-form-field>
                 <input matInput placeholder="Name" formControlName="name" required>
@@ -73,7 +41,7 @@
             <br />
             <mat-form-field>
                 <input matInput type="date" placeholder="Start Date" formControlName="startDt" required>
-            </mat-form-field>
+            </mat-form-field> <mat-card-actions align="start"></mat-card-actions>
             <mat-form-field>
                 <input matInput type="date" placeholder="End Date" formControlName="endDt" required>
             </mat-form-field>
@@ -132,14 +100,14 @@
                     <div formArrayName="orderItems">
                         <div *ngFor="let item of addDataForm.get('orderItems')?.controls; let pointIndex=index"
                             [formGroupName]="pointIndex">
-                            <mat-form-field>
-                                <mat-label>Product Category</mat-label>
-                                <mat-select formControlName="prodCat" (selectionChange)="filterProducts($event.value)">
-                                    <mat-option *ngFor="let c of productCat" [value]="c.name">
-                                        {{ c.name }}
-                                    </mat-option>
-                                </mat-select>
-                            </mat-form-field>
+                                <mat-form-field>
+                                    <mat-label>Product Category</mat-label>
+                                    <mat-select formControlName="prodCat" (selectionChange)="filterProducts($event)">
+                                        <mat-option *ngFor="let c of productCat" [value]="c.name">
+                                            {{ c.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
                             <mat-form-field>
                                 <mat-label>Product Name</mat-label>
                                 <mat-select formControlName="prodName">
@@ -175,8 +143,8 @@
                             [formGroupName]="pointIndex">
                             <mat-form-field>
                                 <mat-label>Assigned To</mat-label>
-                                <mat-select formControlName="assignedtype">
-                                    <mat-option *ngFor="let a of users" [value]="a">
+                                <mat-select formControlName="assigned">
+                                    <mat-option *ngFor="let a of users" [value]="a.name">
                                         {{ a.name }}
                                     </mat-option>
                                 </mat-select>
@@ -200,7 +168,7 @@
         <mat-error *ngIf="savedChanges">
             Data is saved.
             <label class="small-spacer"></label>
-            <mat-icon (click)="this.editDataForm.reset();savedChanges=false;toggle('searchMode');">clear</mat-icon>
+            <mat-icon (click)="this.editDataForm.reset();savedChanges=false;toggle('resMode');">clear</mat-icon>
         </mat-error>
         <div *ngIf="!savedChanges">
             <mat-progress-bar mode="indeterminate" *ngIf="dataLoading"></mat-progress-bar>
@@ -208,14 +176,7 @@
             <mat-card-actions align="start">
                 <button type="submit" mat-raised-button *ngIf="(userRole$ | async)?.addressbook.write"
                     [disabled]="!this.editDataForm.valid || this.editDataForm.pristine" color="primary">Update</button>
-                <span class="med-spacer"></span>
-                <span matTooltip="Search">
-                    <mat-icon color="primary" (click)="toggle('searchMode')">search</mat-icon>
-                </span>
-                <span class="small-spacer"></span>
-                <span matTooltip="Shwo Recent Results">
-                    <mat-icon color="primary" (click)="toggle('resMode');getData();">cached</mat-icon>
-                </span>
+                <button color="primary" mat-raised-button (click)="toggle('resMode');getData();">Show Recent Orders</button>
             </mat-card-actions>
             <mat-form-field>
                 <input matInput placeholder="Name" formControlName="name" required>
@@ -371,8 +332,8 @@
                             [formGroupName]="pointIndex">
                             <mat-form-field>
                                 <mat-label>Assigned To</mat-label>
-                                <mat-select formControlName="assignedtype">
-                                    <mat-option *ngFor="let a of users" [value]="a">
+                                <mat-select formControlName="assigned">
+                                    <mat-option *ngFor="let a of users" [value]="a.name">
                                         {{ a.name }}
                                     </mat-option>
                                 </mat-select>
@@ -392,21 +353,16 @@
 <!-- Results mode -->
 <ng-template #showResMode>
     <mat-card-actions align="start">
-        <span class="med-spacer"></span>
-        <span class="med-spacer"></span>
-        <span class="med-spacer"></span>
-        <span matTooltip="Add new Order">
-            <mat-icon color="primary" (click)="toggle('addMode')">add</mat-icon>
-        </span>
-        <span class="small-spacer"></span>
-        <span matTooltip="Search All">
-            <mat-icon color="primary" (click)="toggle('searchMode')">search</mat-icon>
-        </span>
-    </mat-card-actions>
-    <div class="example-header">
         <mat-form-field>
             <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Search Recent Results">
         </mat-form-field>
+        <button  mat-raised-button color="primary" matTooltip="Add new Order" (click)="toggle('addMode')">
+            Add New Order
+        </button>
+        <span class="small-spacer"></span>
+    </mat-card-actions>
+    <div class="example-header">
+       
     </div>
     <div class="example-container mat-elevation-z8">
         <mat-table [dataSource]="dataSource" matSort>
@@ -419,9 +375,19 @@
                 <mat-header-cell *matHeaderCellDef mat-sort-header>Name</mat-header-cell>
                 <mat-cell *matCellDef="let row"> {{row.name}} </mat-cell>
             </ng-container>
-            <ng-container matColumnDef="OrderID">
-                <mat-header-cell *matHeaderCellDef mat-sort-header>ID</mat-header-cell>
-                <mat-cell *matCellDef="let row"> {{row.OrderID}} </mat-cell>
+   
+            <ng-container matColumnDef="purpose">
+                <mat-header-cell *matHeaderCellDef mat-sort-header>Comment</mat-header-cell>
+                <mat-cell *matCellDef="let row"> {{row.purpose}} </mat-cell>
+            </ng-container>
+            <ng-container matColumnDef="updatedAt">
+                <mat-header-cell *matHeaderCellDef mat-sort-header>Updated At</mat-header-cell>
+                <mat-cell *matCellDef="let row"> {{ row.updatedAt.toDate() | date: 'yyyy-MM-dd HH:mm:ss' }} </mat-cell>
+            </ng-container>
+            
+            <ng-container matColumnDef="status">
+                <mat-header-cell *matHeaderCellDef mat-sort-header>Status</mat-header-cell>
+                <mat-cell *matCellDef="let row"> {{row.status}} </mat-cell>
             </ng-container>
             <ng-container matColumnDef="_id">
                 <mat-header-cell *matHeaderCellDef> action </mat-header-cell>

@@ -45,7 +45,7 @@ export class WorkordersComponent implements OnInit, OnDestroy {
   isStealBarSelect=false;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
-  displayedColumns = ['jobCat', 'orderName', 'status','purpose','updatedAt', '_id'];
+  displayedColumns = ['jobCat', 'orderName', 'status','steelVariant','purpose','quantity', '_id'];
   // file upload
   docId: string;
   fileName: string;
@@ -61,22 +61,18 @@ export class WorkordersComponent implements OnInit, OnDestroy {
 
 
   GetFormData(){
-    this._backendService.getDocs("WORKORDERS").subscribe((res) => {
+    this._backendService.getDocs("ORDERS").subscribe((res) => {
       if (res.length > 0) {
      this.orders=res;
       };
     });
+    console.log(this.orders);
     this._backendService.getDocs("USERS").subscribe((res) => {
       if (res.length > 0) {
      this.users=res;
       };
     });
   } 
-  // formattedDate(row: any): string {
-  //   return this.datePipe.transform(row.updatedAt, 'yyyy-MM-dd') || '-';
-  // }
-
-
 
   selectJobCatRelatedData() {
     this.isStealBarSelect=true
@@ -85,46 +81,51 @@ export class WorkordersComponent implements OnInit, OnDestroy {
   calculateSteelQuantity() {
     // const product = '8mm';
     const bundleWeight = parseFloat(this.addDataForm.get('weight').value);
+    const product = this.addDataForm.get('steelVariant').value;
     let steelQuantity;
 
-    // switch (product) {
-    //   case '8mm':
-    //     steelQuantity = bundleWeight / 0.394;
-    //     break;
-    //   case '10mm':
-    //     steelQuantity = bundleWeight / 0.617;
-    //     break;
-    //   case '12mm':
-    //     steelQuantity = bundleWeight / 0.888;
-    //     break;
-    //   case '16mm':
-    //     steelQuantity = bundleWeight / 1.579;
-    //     break;
-    //   case '20mm':
-    //     steelQuantity = bundleWeight / 2.469;
-    //     break;
-    //   default:
-    //     steelQuantity = 0;
-    // }
-    steelQuantity = bundleWeight / 0.617;
+    switch (product) {
+      case '8mm':
+        steelQuantity = bundleWeight / 0.394;
+        break;
+      case '10mm':
+        steelQuantity = bundleWeight / 0.617;
+        break;
+      case '12mm':
+        steelQuantity = bundleWeight / 0.888;
+        break;
+      case '16mm':
+        steelQuantity = bundleWeight / 1.579;
+        break;
+      case '20mm':
+        steelQuantity = bundleWeight / 2.469;
+        break;
+      default:
+        steelQuantity = 0;
+    }
     this.addDataForm.patchValue({
-      quantity: Math.round(steelQuantity)
+      quantity: Math.round(steelQuantity),
+      steelVariant:product,
+      weight:bundleWeight
     });
-    this.addDataForm.get('quantity').disable();
+    this.addDataForm.get('quantity').setValue(Math.round(steelQuantity));
+    // this.addDataForm.get('quantity').disable();
   }
   ngOnInit() {
     this.GetFormData();
-    this.toggleField = "addMode";
+    this.toggle('resMode')
+    this.getData();
     this.error = false;
     this.errorMessage = "";
     this.dataSource = new MatTableDataSource(this.members);
     this.addDataForm = this._fb.group({
       orderName: ['', [Validators.minLength(2), Validators.required]],
-      jobCat: ['', [Validators.required]],
+      jobCat: [ this.jobCat[0], [Validators.required]],
       weight: ['', [Validators.required]],
-      quantity: ['', [Validators.required]],
+      quantity: [''],
       status: ['', [Validators.required]],
       purpose: ['',Validators.required],
+      steelVariant: ['',Validators.required],
       assigned: this._fb.array([])
       
     });
@@ -133,8 +134,9 @@ export class WorkordersComponent implements OnInit, OnDestroy {
       orderName: ['', [Validators.minLength(2), Validators.required]],
       jobCat: ['', [Validators.required]],
       weight: ['', [Validators.required]],
-      quantity: ['', [Validators.required]],
+      quantity: [''],
       status: ['', [Validators.required]],
+      steelVariant: ['',Validators.required],
       purpose: ['',Validators.required],
       assigned: this._fb.array([])
     });
@@ -150,7 +152,6 @@ export class WorkordersComponent implements OnInit, OnDestroy {
 
   addAssigned(formName) {
     this.ASSIGNEDLINES(formName).push(this._fb.group({
-      assignedtype: [''],
       assigned: ['']
     }));
   }
@@ -187,6 +188,7 @@ export class WorkordersComponent implements OnInit, OnDestroy {
 
   setData(formData) {
     this.dataLoading = true;
+    console.log(formData);
     return this._backendService.setDoc('WORKORDERS', formData, this.authState.uid).then(res => {
       if (res) {
         this.savedChanges = true;
@@ -233,13 +235,15 @@ export class WorkordersComponent implements OnInit, OnDestroy {
         this.editDataForm = this._fb.group({
           orderName: ['', [Validators.minLength(2), Validators.required]],
           jobCat: ['', [Validators.required]],
-          weight: ['', [Validators.required]],
-          quantity: ['', [Validators.required]],
-          status: ['', [Validators.required]],
-          purpose: ['',Validators.required],
-          assigned: this._fb.array([])
+          weight: '',
+          quantity: '',
+          status: '',
+          purpose: '',
+          assigned:this._fb.array([]),
+          steelVariant:''
           
         });
+        this.editDataForm.patchValue(this.data$);
        
         for (let i = 0; i < this.data$["assigned"].length; i++) {
           this.ASSIGNEDLINES('editDataForm').push(this._fb.group(this.data$["assigned"][i]));

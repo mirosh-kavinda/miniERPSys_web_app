@@ -41,14 +41,12 @@
       <mat-icon (click)="this.addDataForm.reset();savedChanges=false;toggle('searchMode');">clear</mat-icon>
     </mat-error>
     <div *ngIf="!savedChanges">
-      <mat-card-actions>
-      <span matTooltip="Search">
-        <mat-icon color="primary" (click)="toggle('searchMode')">search</mat-icon>
-      </span>
-      <span class="small-spacer"></span>
-      <span matTooltip="Show Recent Results">
-        <mat-icon color="primary" (click)="toggle('resMode');getData();">cached</mat-icon>
-      </span>
+      <mat-card-actions align="start">
+        <button type="submit" mat-raised-button color="primary" [disabled]="!addDataForm.valid">Add New Product</button>
+        <button type="reset" (click)="this.addDataForm.reset();" mat-raised-button [disabled]="!addDataForm.valid" color="primary">Clear</button>
+    
+          <button mat-raised-button color="primary" (click)="toggle('resMode');getData();">Show Recent Products</button>
+       
     </mat-card-actions>
       <mat-progress-bar mode="indeterminate" *ngIf="dataLoading"></mat-progress-bar>
       <mat-error *ngIf="error">Error: {{ errorMessage }}</mat-error>
@@ -68,15 +66,33 @@
       <mat-form-field>
         <input matInput placeholder="*Product Quantity" formControlName="quantity" required>
       </mat-form-field>
+      
       <mat-form-field>
         <input matInput placeholder="*Unit Price" formControlName="unitprice" required>
       </mat-form-field>
+      <mat-accordion>
+        <mat-expansion-panel (opened)="panelOpenState = true"
+                             (closed)="panelOpenState = false">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              variant #s
+            </mat-panel-title>
+            <mat-panel-description>
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+            <div formArrayName="variants">
+              <div *ngFor="let item of addDataForm.get('variants')?.controls; let pointIndex=index" [formGroupName]="pointIndex">
+                <mat-form-field>
+                  <input matInput placeholder="Variant #" formControlName="variant">
+                </mat-form-field>
+                  <mat-icon color="warn" (click)="deletePhone(pointIndex,'addDataForm')">delete</mat-icon>
+              </div>
+              <mat-icon color="primary" (click)="addPhone('addDataForm')">add</mat-icon>
+            </div>
+        </mat-expansion-panel>
+      </mat-accordion>
     </div>
-    <mat-card-actions align="start">
-      <button type="submit" mat-raised-button color="primary" [disabled]="!addDataForm.valid">Add New Product</button>
-      <button type="reset" (click)="this.addDataForm.reset();" mat-raised-button [disabled]="!addDataForm.valid" color="primary">Clear</button>
-      <span class="med-spacer"></span>
-  </mat-card-actions>
+   
   </form>
 </ng-template>
 <!-- edit mode -->
@@ -94,14 +110,7 @@
       <mat-card-actions align="start">
         <button type="submit" mat-raised-button 
         [disabled]="!this.editDataForm.valid " color="primary">Update</button>
-        <span class="med-spacer"></span>
-        <span matTooltip="Search">
-          <mat-icon color="primary" (click)="toggle('searchMode')">search</mat-icon>
-        </span>
-        <span class="small-spacer"></span>
-        <span matTooltip="Shwo Recent Results">
-          <mat-icon color="primary" (click)="toggle('resMode');getData();">cached</mat-icon>
-        </span>
+          <button mat-raised-button color="primary" (click)="toggle('resMode');getData();">Show Recent Products</button>
       </mat-card-actions>
       <mat-form-field>
           <input matInput placeholder="Product Name" formControlName="name" required>
@@ -110,13 +119,32 @@
           <input matInput placeholder="Product Category #" formControlName="producttype" required>
         </mat-form-field>
         <mat-form-field>
-          <mat-label>Contact Type</mat-label>
-          <mat-select formControlName="product">
-            <mat-option *ngFor="let c of products" [value]="c">
-              {{ c }}
-            </mat-option>
-          </mat-select>
+          <input matInput placeholder="Product Quantity" formControlName="quantity" required>
         </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Unit Price" formControlName="unitprice" required>
+        </mat-form-field>
+        <mat-accordion>
+          <mat-expansion-panel (opened)="panelOpenState = true"
+                               (closed)="panelOpenState = false">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                variant #s
+              </mat-panel-title>
+              <mat-panel-description>
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+              <div formArrayName="variants">
+                <div *ngFor="let item of addDataForm.get('variants')?.controls; let pointIndex=index" [formGroupName]="pointIndex">
+                  <mat-form-field>
+                    <input matInput placeholder="Variant #" formControlName="variant">
+                  </mat-form-field>
+                    <mat-icon color="warn" (click)="deletePhone(pointIndex,'addDataForm')">delete</mat-icon>
+                </div>
+                <mat-icon color="primary" (click)="addPhone('addDataForm')">add</mat-icon>
+              </div>
+          </mat-expansion-panel>
+        </mat-accordion>
         <mat-accordion>
           <mat-expansion-panel>
             <mat-expansion-panel-header>
@@ -160,22 +188,16 @@
 <!-- Results mode -->
 <ng-template #showResMode>
   <mat-card-actions align="start">
-    <span class="med-spacer"></span>
-    <span class="med-spacer"></span>
-    <span class="med-spacer"></span>
-    <span matTooltip="Add new contact">
-      <mat-icon color="primary" (click)="toggle('addMode')">add</mat-icon>
-    </span>
-    <span class="small-spacer"></span>
-    <span matTooltip="Search All">
-      <mat-icon color="primary" (click)="toggle('searchMode')">search</mat-icon>
-    </span>
-  </mat-card-actions>
-  <div class="example-header">
+    
     <mat-form-field>
       <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Search Recent Results">
     </mat-form-field>
-  </div>
+
+      <button mat-raised-button color="primary" *ngIf="(data$ | async)?.product.write" (click)="toggle('addMode')">Add New Product</button>
+
+  
+  </mat-card-actions>
+
   <div class="example-container mat-elevation-z8">
     <mat-table [dataSource]="dataSource" matSort>
       <ng-container matColumnDef="producttype">

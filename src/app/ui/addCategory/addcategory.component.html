@@ -5,30 +5,7 @@
     else (toggleField=='addMode')? showAddMode : ((toggleField=='editMode')? showEditMode : showResMode)">
       <!-- searchmode -->
 
-      <form #searchFormData="ngForm" class="example-form">
-        <mat-card-actions align="start">
-          <button type="button" (click)="toggle('resMode');getData(searchFormData.value);" 
-          mat-raised-button [disabled]="(name.value == '') || !searchFormData.valid"
-            color="primary">Search</button>
-          <span class="med-spacer"></span>
-          <span matTooltip="add new contact">
-            <mat-icon color="primary" (click)="toggle('addMode')">add</mat-icon>
-          </span>
-
-          <span matTooltip="show Recent Results">
-            <mat-icon color="primary" (click)="toggle('resMode');getData();">cached</mat-icon>
-          </span>
-        </mat-card-actions>
-        <mat-form-field class="example-form">
-          <input matInput type="text" placeholder="Category Name" id="name" name="name" #name="ngModel" ngModel [disabled]="name.value !== ''">
-        </mat-form-field>
-        <mat-error *ngIf="name.invalid && (name.dirty || name.touched)">Please enter a valid name.</mat-error>
-        <br>
-        <mat-form-field class="example-form">
-          <input matInput type="text" placeholder="Category Type" id="catType" name="catType" #catType="ngModel" ngModel [disabled]="catType.value !== ''">
-        </mat-form-field>
-        <mat-error *ngIf="catType.invalid && (catType.dirty || catType.touched)">Please enter a valid Category Type.</mat-error>
-      </form>
+    
     </div>
   </mat-card-content>
 </mat-card>
@@ -41,16 +18,12 @@
       <mat-icon (click)="this.addDataForm.reset();savedChanges=false;toggle('searchMode');">clear</mat-icon>
     </mat-error>
     <div *ngIf="!savedChanges">
-      <mat-progress-bar mode="indeterminate" *ngIf="dataLoading"></mat-progress-bar>
       <mat-error *ngIf="error">Error: {{ errorMessage }}</mat-error>
       <mat-card-actions align="start">
-        <span matTooltip="Search">
-          <mat-icon color="primary" (click)="toggle('searchMode')">search</mat-icon>
-        </span>
-        <span class="small-spacer"></span>
-        <span matTooltip="Show Recent Results">
-          <mat-icon color="primary" (click)="toggle('resMode');getData();">cached</mat-icon>
-        </span>
+        <button type="submit" mat-raised-button color="primary" [disabled]="!addDataForm.valid">Add New Category</button>
+        <button type="reset" (click)="this.addDataForm.reset();" mat-raised-button [disabled]="!addDataForm.valid" color="primary">Clear</button>
+
+        <button mat-raised-button color="primary" (click)="toggle('resMode');getData();">Show Recent Products</button>
       </mat-card-actions>
       <!-- sadas -->
       <mat-form-field>
@@ -60,11 +33,7 @@
         <input matInput placeholder="*Category Type" formControlName="catType" required>
       </mat-form-field>
     </div>
-    <mat-card-actions align="start">
-      <button type="submit" mat-raised-button color="primary" [disabled]="!addDataForm.valid">Add New Category</button>
-      <button type="reset" (click)="this.addDataForm.reset();" mat-raised-button [disabled]="!addDataForm.valid" color="primary">Clear</button>
-      <span class="med-spacer"></span>
-      </mat-card-actions>
+
   </form>
 </ng-template>
 <!-- edit mode -->
@@ -103,22 +72,12 @@
 <!-- Results mode -->
 <ng-template #showResMode>
   <mat-card-actions align="start">
-    <span class="med-spacer"></span>
-    <span class="med-spacer"></span>
-    <span class="med-spacer"></span>
-    <span matTooltip="Add new contact">
-      <mat-icon color="primary" (click)="toggle('addMode')">add</mat-icon>
-    </span>
-    <span class="small-spacer"></span>
-    <span matTooltip="Search All">
-      <mat-icon color="primary" (click)="toggle('searchMode')">search</mat-icon>
-    </span>
-  </mat-card-actions>
-  <div class="example-header">
     <mat-form-field>
       <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Search Recent Results">
     </mat-form-field>
-  </div>
+    <button mat-raised-button color="primary" *ngIf="(data$ | async)?.product.write" (click)="toggle('addMode');getData();">Add New Category</button>
+  </mat-card-actions>
+
   <div class="example-container mat-elevation-z8">
     <mat-table [dataSource]="dataSource" matSort>
 

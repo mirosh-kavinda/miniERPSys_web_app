@@ -47,7 +47,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
-  displayedColumns = ['campaignType', 'name', 'campaignID', '_id'];
+  displayedColumns = ['OrderType', 'name', 'purpose','updatedAt','status', '_id'];
   // file upload
   docId: string;
   fileName: string;
@@ -61,7 +61,8 @@ export class OrdersComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.toggleField = "searchMode";
+    this.toggle('resMode')
+    this.getData();
     this.error = false;
     this.errorMessage = "";
     this.dataSource = new MatTableDataSource(this.members);
@@ -104,17 +105,13 @@ export class OrdersComponent implements OnInit, OnDestroy {
       this._backendService.getDocs("USERS").subscribe((res) => {
       if (res.length > 0) {
       this.users=res;
-      console.log(this.users);
      this.users = this.users.filter(user => user.role !== 'admin');
 
       };
     });
-    this._backendService.getDocs("PRODUCTS").subscribe((res) => {
-      if (res.length > 0) {
-     this.products=res;
-      };
-    });
+  
   }
+
   ADDRESSLINES(formName) {
     return this[formName].get('addresses') as FormArray;
   }
@@ -135,7 +132,6 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
   addAssigned(formName) {
     this.ASSIGNEDLINES(formName).push(this._fb.group({
-      assignedtype: [''],
       assigned: ['']
     }));
   }
@@ -308,8 +304,16 @@ export class OrdersComponent implements OnInit, OnDestroy {
     }
   }
   filterProducts(categoryId: any) {
-      this.products = this.products.filter(product => product.producttype === categoryId);
+    
+    this._backendService.getDocs("PRODUCTS").subscribe((res) => {
+      if (res.length > 0) {
+     this.products=res;
+     this.products = this.products.filter(prod => prod.producttype == categoryId.value);
+      };
+    });
     } 
+
+    
 
     calculateSubtotal(index: number) {
       const orderItemsArray = this.addDataForm.get('orderItems') as FormArray; // Explicitly cast to FormArray
@@ -320,10 +324,13 @@ export class OrdersComponent implements OnInit, OnDestroy {
       // Find the selected product based on the product name
       const selectedProduct = this.products.find(product => product.name === productName);
     
-  const unitPrice = selectedProduct ? parseFloat(selectedProduct.unitprice) : 0;
-
-  const subtotal = selectedProduct ? unitPrice * quantity : 0;
+      const unitPrice = selectedProduct ? parseFloat(selectedProduct.unitprice) : 0;
+    
+      let subtotal = selectedProduct ? unitPrice * quantity : 0;
+      subtotal = Math.round(subtotal * 100) / 100; // Round to two decimal places
+    
       orderItem.get('subtotal').setValue(subtotal);
     }
+    
     
 }
