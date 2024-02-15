@@ -1,4 +1,4 @@
-Hardware Wholesale ERP Web Application
+ ## Hardware Wholesale ERP Web Application <br>
 This is a wholesale ERP web application designed to manage hardware items and maintain company data. It serves as a comprehensive solution to handle inventory, sales, purchases, and other related tasks for a hardware wholesale business. The application is built using Angular for the frontend and Firebase for the backend.
 
 Features
